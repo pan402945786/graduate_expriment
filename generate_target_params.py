@@ -75,26 +75,24 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
     # print(k)    #打印网络中的变量名
 
 
-print('Saving model......')
-torch.save(net.state_dict(), '%s/net_froze_all_layers_before_training.pth' % (args.outf))
+# print('Saving model......')
+# torch.save(net.state_dict(), '%s/init_model.pth' % (args.outf))
 
 toLoad = {}
 checkpoint = torch.load("./model/net_135.pth", map_location='cpu')
 net.load_state_dict(checkpoint)
 params = net.state_dict()
 toLoad = params
-for k,v in params.items():
-    print(k)    #打印网络中的变量名
-    print(v)
-    break
-exit()
+# for k,v in params.items():
+#     print(k)    #打印网络中的变量名
+#     print(v)
+#     break
 # print("1.0----135")
 # print(params["conv1.0.weight"])
 # print("1.1----135")
 # print(params["conv1.1.weight"])
-exit(0)
 print("------------")
-checkpoint = torch.load("./model/net_init_random.pth", map_location='cpu')
+checkpoint = torch.load("./model/init_model.pth", map_location='cpu')
 
 # correct = 0
 # total = 0
@@ -124,17 +122,19 @@ initLayers = [
               "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",
               "layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias",
               "layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",
-              "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
-              "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias",
-              "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
-              "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
               "layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",
-              "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
+              "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
+              "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
+              "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias",
+              "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
               "layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",
-              "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
+              "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
               "layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias",
-              "conv1.0.weight", "conv1.1.weight", "conv1.1.bias",
+              "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
+              # "conv1.0.weight", "conv1.1.weight", "conv1.1.bias",
               ]
+fileName = "net_reset_fc_conv16_before_training.pth"
+print(fileName)
 for k in checkpoint.keys():
     if k in initLayers:
         toLoad[k] = checkpoint[k]
@@ -142,7 +142,8 @@ for k in checkpoint.keys():
 net.load_state_dict(toLoad)
 params=net.state_dict()
 print('Saving model......')
-torch.save(net.state_dict(), '%s/net_froze_all_layers_before_training.pth' % (args.outf))
+
+torch.save(net.state_dict(), '%s/%s' % (args.outf, fileName))
 # for k,v in params.items():
 #     print(k)    #打印网络中的变量名
 # print("1.0----added")

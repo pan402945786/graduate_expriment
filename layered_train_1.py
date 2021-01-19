@@ -4,6 +4,7 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import argparse
+import time
 from resnet import ResNet18
 
 # 定义是否使用GPU
@@ -16,12 +17,10 @@ parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (
 args = parser.parse_args()
 
 # 超参数设置
-EPOCH = 20   #遍历数据集次数
+EPOCH = 80   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 BATCH_SIZE = 128      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
-
-SAMPLE_SIZE = 200
 
 # 准备数据集并预处理
 transform_train = transforms.Compose([
@@ -39,9 +38,8 @@ transform_test = transforms.Compose([
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=False, transform=transform_train) #训练数据集
 testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=False, transform=transform_test)
 
-# 输入要删除的类别
+# 输入要保留的类别,删除了第5和第9个类别
 selectedClasses = [0, 1, 2, 3, 4, 6, 7, 8]
-# selectedClasses = [l]
 selectedClassesStr = []
 for i in range(len(selectedClasses)):
     selectedClassesStr.append(str(selectedClasses[i]))
@@ -66,33 +64,70 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 net = ResNet18().to(device)
 
 files = [
-    'net_froze_1_layer_before_training.pth',
-    'net_froze_2_layers_before_training.pth',
-    'net_froze_3_layers_before_training.pth',
-    'net_froze_5_layers_before_training.pth',
-    'net_froze_7_layers_before_training.pth',
-    'net_froze_9_layers_before_training.pth',
-    'net_froze_13_layers_before_training.pth',
-    'net_froze_17_layers_before_training.pth',
-    'net_froze_all_layers_before_training.pth',
+    'net_reset_fc_before_training.pth', # 需要冻结全链接层
+    'net_reset_fc_conv1_before_training.pth', # 需要冻结全连接层和1个卷积层
+    'net_reset_fc_conv2_before_training.pth',
+    'net_reset_fc_conv3_before_training.pth',
+    'net_reset_fc_conv4_before_training.pth',
+    'net_reset_fc_conv5_before_training.pth',
+    'net_reset_fc_conv6_before_training.pth',
+    'net_reset_fc_conv7_before_training.pth',
+    'net_reset_fc_conv8_before_training.pth',
+    'net_reset_fc_conv9_before_training.pth',
+    'net_reset_fc_conv10_before_training.pth',
+    'net_reset_fc_conv11_before_training.pth',
+    'net_reset_fc_conv12_before_training.pth',
+    'net_reset_fc_conv13_before_training.pth',
+    'net_reset_fc_conv14_before_training.pth',
+    'net_reset_fc_conv15_before_training.pth',
+    'net_reset_fc_conv16_before_training.pth',
+    'net_reset_all_before_training.pth',
 ]
 
 savedFiles = [
-    'net_not_froze_1_layer_after_training.pth',
-    'net_not_froze_2_layers_after_training.pth',
-    'net_not_froze_3_layers_after_training.pth',
-    'net_not_froze_5_layers_after_training.pth',
-    'net_not_froze_7_layers_after_training.pth',
-    'net_not_froze_9_layers_after_training.pth',
-    'net_not_froze_13_layers_after_training.pth',
-    'net_not_froze_17_layers_after_training.pth',
-    'net_not_froze_all_layers_after_training.pth',
+    'net_reset_fc_after_training.pth',
+    'net_reset_fc_conv1_after_training.pth',
+    'net_reset_fc_conv2_after_training.pth',
+    'net_reset_fc_conv3_after_training.pth',
+    'net_reset_fc_conv4_after_training.pth',
+    'net_reset_fc_conv5_after_training.pth',
+    'net_reset_fc_conv6_after_training.pth',
+    'net_reset_fc_conv7_after_training.pth',
+    'net_reset_fc_conv8_after_training.pth',
+    'net_reset_fc_conv9_after_training.pth',
+    'net_reset_fc_conv10_after_training.pth',
+    'net_reset_fc_conv11_after_training.pth',
+    'net_reset_fc_conv12_after_training.pth',
+    'net_reset_fc_conv13_after_training.pth',
+    'net_reset_fc_conv14_after_training.pth',
+    'net_reset_fc_conv15_after_training.pth',
+    'net_reset_fc_conv16_after_training.pth',
+    'net_reset_all_after_training.pth',
 ]
 
-with open("acc.txt", "w") as f:
-    with open("log.txt", "w")as f2:
-        for k, file in enumerate(files, 0):
+layeredParams = []
+layeredParams.append(["conv1.0.weight", "conv1.1.weight", "conv1.1.bias"])
+layeredParams.append(["layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",])
+layeredParams.append(["layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias",])
+layeredParams.append(["layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",])
+layeredParams.append(["layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",])
+layeredParams.append(["layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",])
+layeredParams.append(["layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",])
+layeredParams.append(["layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",])
+layeredParams.append(["layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",])
+layeredParams.append(["layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",])
+layeredParams.append(["layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias",])
+layeredParams.append(["layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",])
+layeredParams.append(["layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias",])
+layeredParams.append(["layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",])
+layeredParams.append(["layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias",])
+layeredParams.append(["layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",])
+layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",])
+layeredParams.append(["fc.weight", "fc.bias",])
 
+for k, file in enumerate(files, 0):
+    with open(file+"_acc.txt", "w") as f:
+        with open(file+"_log.txt", "w")as f2:
             # 加载参数
             checkpoint = torch.load("./model/" + file, map_location='cpu')
             net.load_state_dict(checkpoint)
@@ -102,18 +137,39 @@ with open("acc.txt", "w") as f:
             optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
 
             # 冻结相关层
+            frozenLayers=[]
+            for j in range(0, len(layeredParams)-k-1):
+                frozenLayers = frozenLayers + layeredParams[j]
+            frozenIndex = []
+            i = 0
+            for name, param in net.named_parameters():
+                if name in frozenLayers:
+                    frozenIndex.append(i)
+                i = i + 1
+            j = 0
 
-
+            for param in net.parameters():
+                param.requires_grad = True
+                if j in frozenIndex:
+                    param.requires_grad = False  # 冻结网络
+                j = j + 1
             # 训练
             if __name__ == "__main__":
                 best_acc = 50  # 2 初始化best test accuracy
                 print("Start Training, Resnet-18! count:" + str(k))  # 定义遍历数据集的次数
                 quitFlag = False
                 for epoch in range(pre_epoch, EPOCH):
+                    print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+                    f.write('count=%d,epoch:%03d  time:%s' % (k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                    f2.write('count=%d,epoch:%03d  time:%s' % (k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     if quitFlag:
                         break
                     quitCount = 0
                     print('\nEpoch: %d' % (epoch + 1))
+                    f.write('count=%d,epoch:%03d  time:%s' % (
+                    k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                    f2.write('count=%d,epoch:%03d  time:%s' % (
+                    k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     net.train()
                     sum_loss = 0.0
                     correct = 0.0
@@ -138,7 +194,7 @@ with open("acc.txt", "w") as f:
                         correct += predicted.eq(labels.data).cpu().sum()
                         print('[count=%d, epoch:%d, iter:%d] Loss: %.03f | Acc: %.3f%% '
                               % (k, epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total))
-                        f2.write('count=%d, %03d  %05d |Loss: %.03f | Acc: %.3f%% '
+                        f2.write('count=%d,epoch:%03d  iter:%05d |Loss: %.03f | Acc: %.3f%% '
                                  % (k, epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total))
                         f2.write('\n')
                         f2.flush()
@@ -173,11 +229,11 @@ with open("acc.txt", "w") as f:
                             quitCount = 0
                         else:
                             quitCount += 1
-                            if quitCount > 10:
+                            if quitCount > 30:
                                 quitFlag = True
                                 break
                 print("Training Finished, TotalEPOCH=%d" % EPOCH)
                 print('Saving model......')
                 torch.save(net.state_dict(), '%s/%s' % (args.outf, savedFiles[k]))
 
-print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+print("+++++++++++++++++++++++++++++END+++++++++++++++++++++++++++++++++++")
