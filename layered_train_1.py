@@ -55,13 +55,31 @@ for i in range(len(testset)):
         selectedTestSet.append(testset[i])
 
 trainloader = torch.utils.data.DataLoader(selectedTrainSet, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)   #生成一个个batch进行批训练，组成batch的时候顺序打乱取
-testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+testloader = torch.utils.data.DataLoader(selectedTestSet, batch_size=100, shuffle=False, num_workers=2)
 
 # Cifar-10的标签
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # 模型定义-ResNet
 net = ResNet18().to(device)
+
+i=0
+j=0
+for name, param in net.named_parameters():
+
+    if i == 0:
+        print(name+":")
+        print(param)
+        print("\n")
+    i = i + 1
+    break
+for param in net.parameters():
+    if j == 0:
+        print("param:\n")
+        print(param)
+    j = j + 1
+    break
+exit()
 
 files = [
     'net_reset_fc_before_training.pth', # 需要冻结全链接层
@@ -126,8 +144,11 @@ layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer
 layeredParams.append(["fc.weight", "fc.bias",])
 
 for k, file in enumerate(files, 0):
-    with open(file+"_acc.txt", "w") as f:
-        with open(file+"_log.txt", "w")as f2:
+    if k < 11:
+        print("continue k:" + str(k))
+        continue
+    with open(file+"_acc.txt", "a") as f:
+        with open(file+"_log.txt", "a")as f2:
             # 加载参数
             checkpoint = torch.load("./model/" + file, map_location='cpu')
             net.load_state_dict(checkpoint)
@@ -161,15 +182,19 @@ for k, file in enumerate(files, 0):
                 for epoch in range(pre_epoch, EPOCH):
                     print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
                     f.write('count=%d,epoch:%03d  time:%s' % (k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                    f.flush()
                     f2.write('count=%d,epoch:%03d  time:%s' % (k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                    f2.flush()
                     if quitFlag:
                         break
                     quitCount = 0
                     print('\nEpoch: %d' % (epoch + 1))
-                    f.write('count=%d,epoch:%03d  time:%s' % (
+                    f.write('count=%d,epoch:%03d  time:%s\n' % (
                     k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
-                    f2.write('count=%d,epoch:%03d  time:%s' % (
+                    f.flush()
+                    f2.write('count=%d,epoch:%03d  time:%s\n' % (
                     k, epoch + 1, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                    f2.flush()
                     net.train()
                     sum_loss = 0.0
                     correct = 0.0
@@ -198,13 +223,12 @@ for k, file in enumerate(files, 0):
                                  % (k, epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total))
                         f2.write('\n')
                         f2.flush()
-
                     # 每训练完一个epoch测试一下准确率
                     print("Waiting Test!")
                     with torch.no_grad():
                         correct = 0
                         total = 0
-                        for data in testloader:
+                        for l, data in enumerate(testloader, 0):
                             net.eval()
                             images, labels = data
                             images, labels = images.to(device), labels.to(device)
@@ -213,7 +237,7 @@ for k, file in enumerate(files, 0):
                             _, predicted = torch.max(outputs.data, 1)
                             total += labels.size(0)
                             correct += (predicted == labels).sum()
-                        print('测试分类准确率为：%.3f%%' % (100 * correct / total))
+                        print('测试分类准确率为：%.3f%%' % (100 * torch.true_divide(correct, total)))
                         acc = 100. * correct / total
                         # 将每次测试结果实时写入acc.txt文件中
                         f.write("count=%d,EPOCH=%03d,Accuracy= %.3f%%" % (k, epoch + 1, acc))
