@@ -37,12 +37,14 @@ def get_id_label_map(meta_file):
     identity_list = meta_file
     # df = pd.read_csv(identity_list, sep=',\s+', quoting=csv.QUOTE_ALL, encoding="utf-8")
     df = pd.read_csv(identity_list, sep=',', quoting=csv.QUOTE_ALL, encoding="utf-8")
-    df["class"] = -1
-    df.loc[df["Flag"] == 1, "class"] = range(N_IDENTITY_PRETRAIN)
-    df.loc[df["Flag"] == 0, "class"] = range(N_IDENTITY_PRETRAIN, N_IDENTITY)
+    # df["class"] = -1
+    df["class"] = range(N_IDENTITY)
+    # df.loc[df["Flag"] == 1, "class"] = range(N_IDENTITY_PRETRAIN)
+    # df.loc[df["Flag"] == 0, "class"] = range(N_IDENTITY_PRETRAIN, N_IDENTITY)
     key = df["Class_ID"].values
     val = df["class"].values
     id_label_dict = dict(zip(key, val))
+    print(df)
     return id_label_dict
 
 

@@ -7,9 +7,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class ResidualBlock(nn.Module):
+class BasicBlock(nn.Module):
     def __init__(self, inchannel, outchannel, stride=1):
-        super(ResidualBlock, self).__init__()
+        super(BasicBlock, self).__init__()
         self.left = nn.Sequential(
             nn.Conv2d(inchannel, outchannel, kernel_size=3, stride=stride, padding=1, bias=False),
             nn.BatchNorm2d(outchannel),
@@ -30,9 +30,35 @@ class ResidualBlock(nn.Module):
         out = F.relu(out)
         return out
 
+class BottleneckBlock(nn.Module):
+    def __init__(self, inchannel, outchannel, stride=1):
+        super(BottleneckBlock, self).__init__()
+        self.left = nn.Sequential(
+            nn.Conv2d(inchannel, outchannel, kernel_size=1, stride=stride, bias=False),
+            nn.BatchNorm2d(outchannel),
+            nn.Conv2d(outchannel, outchannel, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(outchannel),
+            nn.Conv2d(outchannel, outchannel, kernel_size=1, stride=1, bias=False),
+            nn.BatchNorm2d(outchannel),
+            nn.ReLU(inplace=False)
+            # nn.ReLU(inplace=True)
+        )
+        self.shortcut = nn.Sequential()
+        if stride != 1 or inchannel != outchannel:
+            self.shortcut = nn.Sequential(
+                nn.Conv2d(inchannel, outchannel, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(outchannel)
+            )
+
+    def forward(self, x):
+        out = self.left(x)
+        out += self.shortcut(x)
+        out = F.relu(out)
+        return out
+
 class ResNet(nn.Module):
-    def __init__(self, ResidualBlock, num_classes=10):
-    # def __init__(self, ResidualBlock, num_classes=9131):
+    # def __init__(self, ResidualBlock, layers, num_classes=10):
+    def __init__(self, ResidualBlock, layers, num_classes=100):
         super(ResNet, self).__init__()
         self.inchannel = 64
         self.conv1 = nn.Sequential(
@@ -40,12 +66,12 @@ class ResNet(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
         )
-        self.layer1 = self.make_layer(ResidualBlock, 64,  2, stride=1)
-        self.layer2 = self.make_layer(ResidualBlock, 128, 2, stride=2)
-        self.layer3 = self.make_layer(ResidualBlock, 256, 2, stride=2)
-        self.layer4 = self.make_layer(ResidualBlock, 512, 2, stride=2)
-        self.fc = nn.Linear(512, num_classes)
-        # self.fc = nn.Linear(25088, num_classes)
+        self.layer1 = self.make_layer(ResidualBlock, 64,  layers[0], stride=1)
+        self.layer2 = self.make_layer(ResidualBlock, 128, layers[1], stride=2)
+        self.layer3 = self.make_layer(ResidualBlock, 256, layers[2], stride=2)
+        self.layer4 = self.make_layer(ResidualBlock, 512, layers[3], stride=2)
+        # self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Linear(25088, num_classes)
 
     def make_layer(self, block, channels, num_blocks, stride):
         strides = [stride] + [1] * (num_blocks - 1)   #strides=[1,1]
@@ -69,8 +95,11 @@ class ResNet(nn.Module):
 
 def ResNet18():
 
-    return ResNet(ResidualBlock)
+    return ResNet(BasicBlock, [2, 2, 2, 2])
 
+def ResNet50():
+
+    return ResNet(BottleneckBlock, [3, 4, 6, 3])
 
 
 
