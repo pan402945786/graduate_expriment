@@ -5,6 +5,7 @@ import torchvision
 import torchvision.transforms as transforms
 import argparse
 from resnet import ResNet18
+from resnet_new import ResNet50
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -66,14 +67,15 @@ testloader = torch.utils.data.DataLoader(selectedTestSet, batch_size=100, shuffl
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # 模型定义-ResNet
-net = ResNet18().to(device)
+# net = ResNet18().to(device)
+net = ResNet50().to(device)
 
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
 optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
 
-checkpoint = torch.load("./model/init_model.pth", map_location='cpu')
-net.load_state_dict(checkpoint)
+# checkpoint = torch.load("./model/init_model.pth", map_location='cpu')
+# net.load_state_dict(checkpoint)
 
 # 训练
 if __name__ == "__main__":
