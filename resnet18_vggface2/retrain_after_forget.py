@@ -9,6 +9,7 @@ import datasets
 import os
 import utils
 from vgg_face2 import VGG_Faces2
+import time
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -37,7 +38,7 @@ parser.add_argument('--arch_type', type=str, default='resnet50_ft', help='model 
 
 parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
 parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
-parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list2.txt',
+parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list2-forget2.txt',
                     help='text file containing image files used for training')
 parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list2.txt',
                     help='text file containing image files used for validation, test or feature extraction')
@@ -67,11 +68,11 @@ cuda = torch.cuda.is_available()
 if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 # 超参数设置
-EPOCH = 80   #遍历数据集次数
-pre_epoch = 61  # 定义已经遍历数据集的次数
+EPOCH = 50   #遍历数据集次数
+pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-BATCH_SIZE = 20      #批处理尺寸(batch_size)
-LR = 0.005        #学习率
+BATCH_SIZE = 25      #批处理尺寸(batch_size)
+LR = 0.04        #学习率
 
 # 0. id label map
 meta_file = args.meta_file
@@ -108,7 +109,7 @@ print(len(trainset))
 # testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=False, transform=transform_test)
 # testset = datasets.VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
 testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
-testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
+testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)
 
 # Cifar-10的标签
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
@@ -124,17 +125,17 @@ criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分�
 optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
 
-# print('Saving model......')
-# torch.save(net.state_dict(), '%s/resnet50_normal_init.pth' % (args.outf))
+print('Saving model......')
+torch.save(net.state_dict(), '%s/resnet50_retrain_init.pth' % (args.outf))
 
 # 训练
 if __name__ == "__main__":
     best_acc = 85  #2 初始化best test accuracy
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
-    with open("normal_train_acc.txt", "a") as f:
-        with open("normal_train_log.txt", "a")as f2:
-            checkpoint = torch.load("./model/net_normal_train_061_epoch.pth", map_location='cpu')
-            net.load_state_dict(checkpoint)
+    with open("retrain_acc.txt", "a+") as f:
+        with open("retrain_log.txt", "a+")as f2:
+            # checkpoint = torch.load("./model/net_normal_train_061_epoch.pth", map_location='cpu')
+            # net.load_state_dict(checkpoint)
             for epoch in range(pre_epoch, EPOCH):
                 scheduler.step()
                 print('\nEpoch: %d' % (epoch + 1))
@@ -162,10 +163,10 @@ if __name__ == "__main__":
                     _, predicted = torch.max(outputs.data, 1)
                     total += labels.size(0)
                     correct += predicted.eq(labels.data).cpu().sum()
-                    print('[epoch:%d, iter:%d] Loss: %.03f | Acc: %.3f%% '
-                          % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total))
-                    f2.write('%03d  %05d |Loss: %.03f | Acc: %.3f%% '
-                          % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total))
+                    print('[epoch:%d, iter:%d] Loss: %.03f | Acc: %.3f%% | Time: %s'
+                          % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())) )
+                    f2.write('%03d  %05d |Loss: %.03f | Acc: %.3f%% | Time: %s'
+                          % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     f2.write('\n')
                     f2.flush()
 
@@ -186,19 +187,21 @@ if __name__ == "__main__":
                     print('测试分类准确率为：%.3f%%' % (100. * correct / total))
                     acc = 100. * correct / total
                     # 将每次测试结果实时写入acc.txt文件中
-                    if epoch % 5 == 0:
+                    if epoch % 4 == 0 or epoch > EPOCH - 2:
                         print('Saving model......')
                         torch.save(net.state_dict(), '%s/net_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
-                    f.write("EPOCH=%03d,Accuracy= %.3f%%" % (epoch + 1, acc))
+                    f.write("EPOCH=%03d,Accuracy= %.3f,Time=%s%%" % (epoch + 1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     f.write('\n')
                     f.flush()
                     # 记录最佳测试分类准确率并写入best_acc.txt文件中
                     if acc > best_acc:
-                        f3 = open("best_acc.txt", "w")
+                        f3 = open("retrain_best_acc.txt", "a+")
                         f3.write("EPOCH=%d,best_acc= %.3f%%" % (epoch + 1, acc))
                         f3.close()
                         best_acc = acc
+            f.close()
+            f2.close()
             print('Saving model......')
-            torch.save(net.state_dict(), '%s/resnet50_normal_80epoch_%03d.pth' % (args.outf, epoch + 1))
+            torch.save(net.state_dict(), '%s/resnet50_retrain_50epoch_%03d.pth' % (args.outf, epoch + 1))
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

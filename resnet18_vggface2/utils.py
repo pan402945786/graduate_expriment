@@ -44,7 +44,7 @@ def get_id_label_map(meta_file):
     key = df["Class_ID"].values
     val = df["class"].values
     id_label_dict = dict(zip(key, val))
-    print(df)
+    # print(df)
     return id_label_dict
 
 
