@@ -8,23 +8,49 @@ import utils
 import datasets
 from resnet_1 import ResNet50
 import os
-# from resnet import ResNet18
+from vgg_face2 import VGG_Faces2
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
-parser.add_argument('--outf', default='./model/', help='folder to output images and model checkpoints') #输出结果保存路径
-parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
-parser.add_argument('--dataset_dir', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\root', help='dataset directory')
-parser.add_argument('--train_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\train_list_100.txt',
+
+# parser.add_argument('--outf', default='./model/', help='folder to output images and model checkpoints') #输出结果保存路径
+# parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
+# parser.add_argument('--dataset_dir', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\root', help='dataset directory')
+# parser.add_argument('--train_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\train_list_100.txt',
+#                     help='text file containing image files used for training')
+# parser.add_argument('--test_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\test_list_100.txt',
+#                     help='text file containing image files used for validation, test or feature extraction')
+# parser.add_argument('--meta_file', type=str, default=r'D:\ww2\graduate_expriment/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+# parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
+#                     help='number of data loading workers (default: 4)')
+
+
+parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
+parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
+parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list2-forget2.txt',
                     help='text file containing image files used for training')
-parser.add_argument('--test_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\test_list_100.txt',
+parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list2.txt',
                     help='text file containing image files used for validation, test or feature extraction')
-parser.add_argument('--meta_file', type=str, default=r'D:\ww2\graduate_expriment/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
+                    help='checkpoints directory')
+parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
+                    help='directory where extracted features are saved')
+
+parser.add_argument('--batch_size', type=int, default=32, help='batch size')
+parser.add_argument('--resume', type=str, default='', help='checkpoint file')
+# parser.add_argument('--weight_file', type=str, default=r'D:\ww2/graduate_experiment/weight/resnet50_ft_weight.pkl', help='weight file')
+parser.add_argument('--weight_file', type=str, default='', help='weight file')
+parser.add_argument('--gpu', type=int, default=0)
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
+parser.add_argument('--horizontal_flip', action='store_true',
+                    help='horizontally flip images specified in test_img_list_file')
+
+
 args = parser.parse_args()
 
 # 超参数设置
@@ -74,8 +100,8 @@ kwargs = {'num_workers': args.workers, 'pin_memory': False} if cuda else {}
 # print(len(trainset))
 
 # testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=False, transform=transform_test)
-testset = datasets.VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
-# testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
+# testset = datasets.VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
+testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
 
 # 输入要删除的类别
 # selectedClasses = [0, 1, 2, 3, 4, 6, 7, 8]
@@ -105,8 +131,8 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 # 模型定义-ResNet
 net = ResNet50().to(device)
-net = nn.DataParallel(net)
-net = net.cuda()
+# net = nn.DataParallel(net)
+# net = net.cuda()
 
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
@@ -115,17 +141,9 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 # 使用相同测试集测试各个参数准确率
 print("Waiting Test!")
 
-# savedFiles = [
-#     'net_change_1_layer_after_training.pth',
-#     'net_change_2_layers_after_training.pth',
-#     'net_change_3_layers_after_training.pth',
-#     'net_change_5_layers_after_training.pth',
-#     'net_change_7_layers_after_training.pth',
-#     'net_change_9_layers_after_training.pth',
-#     'net_change_13_layers_after_training.pth',
-#     'net_change_17_layers_after_training.pth',
-#     'net_change_all_layers_after_training.pth',
-# ]
+savedFiles = [
+    'resnet50_retrain_50epoch_050.pth'
+]
 
 testloader = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)
 
