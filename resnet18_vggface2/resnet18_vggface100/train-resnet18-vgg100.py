@@ -4,7 +4,9 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import argparse
-from resnet_1 import ResNet50
+import sys
+sys.path.append("..")
+from resnet_1 import ResNet18
 import datasets
 import os
 import time
@@ -16,37 +18,37 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
-parser.add_argument('--outf', default='./model/', help='folder to output images and model checkpoints') #输出结果保存路径
-parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
+parser.add_argument('--outf', default='../model/', help='folder to output images and model checkpoints') #输出结果保存路径
+parser.add_argument('--net', default='../model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
 
 # parser.add_argument('cmd', type=str,  choices=['train', 'test', 'extract'], help='train, test or extract')
 parser.add_argument('--arch_type', type=str, default='resnet50_ft', help='model type',
                     choices=['resnet50_ft', 'senet50_ft', 'resnet50_scratch', 'senet50_scratch'])
 
-# parser.add_argument('--dataset_dir', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\vggface2_train\train', help='dataset directory')
-# parser.add_argument('--log_file', type=str, default=r'D:\ww2/graduate_experiment/logs/logs.log', help='log file')
-# parser.add_argument('--train_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\train_list2.txt',
-#                     help='text file containing image files used for training')
-# parser.add_argument('--test_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\test_list2.txt',
-#                     help='text file containing image files used for validation, test or feature extraction')
-#
-# parser.add_argument('--meta_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\meta/identity_meta2.csv', help='meta file')
-# parser.add_argument('--checkpoint_dir', type=str, default=r'D:\ww2/graduate_experiment/resnet18_vggface2\weight/checkpoints',
-#                     help='checkpoints directory')
-# parser.add_argument('--feature_dir', type=str, default=r'D:\ww2/graduate_experiment/resnet18_vggface2\features/test',
-#                     help='directory where extracted features are saved')
-
-parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
-parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
-parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list_100.txt',
+parser.add_argument('--dataset_dir', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\root', help='dataset directory')
+parser.add_argument('--log_file', type=str, default=r'D:\ww2/graduate_experiment/logs/logs.log', help='log file')
+parser.add_argument('--train_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\train_list_100.txt',
                     help='text file containing image files used for training')
-parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
+parser.add_argument('--test_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\test_list_100.txt',
                     help='text file containing image files used for validation, test or feature extraction')
-parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
-parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
+
+parser.add_argument('--meta_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\meta/identity_meta2.csv', help='meta file')
+parser.add_argument('--checkpoint_dir', type=str, default=r'D:\ww2/graduate_experiment/resnet18_vggface2\weight/checkpoints',
                     help='checkpoints directory')
-parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
+parser.add_argument('--feature_dir', type=str, default=r'D:\ww2/graduate_experiment/resnet18_vggface2\features/test',
                     help='directory where extracted features are saved')
+
+# parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
+# parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
+# parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list_100.txt',
+#                     help='text file containing image files used for training')
+# parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
+#                     help='text file containing image files used for validation, test or feature extraction')
+# parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+# parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
+#                     help='checkpoints directory')
+# parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
+#                     help='directory where extracted features are saved')
 
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--resume', type=str, default='', help='checkpoint file')
@@ -65,14 +67,17 @@ args = parser.parse_args()
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 cuda = torch.cuda.is_available()
+print('cuda:')
+print(cuda)
+exit()
 if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 # 超参数设置
-EPOCH = 80   #遍历数据集次数
-pre_epoch = 50  # 定义已经遍历数据集的次数
+EPOCH = 30   #遍历数据集次数
+pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-BATCH_SIZE = 25      #批处理尺寸(batch_size)
-LR = 0.001        #学习率
+BATCH_SIZE = 128      #批处理尺寸(batch_size)
+LR = 0.1        #学习率
 
 # 0. id label map
 meta_file = args.meta_file
@@ -115,27 +120,25 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # 模型定义-ResNet
-# net = ResNet18().to(device)
-net = ResNet50().to(device)
+net = ResNet18().to(device)
+# net = ResNet50().to(device)
 net = nn.DataParallel(net)
 net = net.cuda()
 
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
 optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.8)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=3, gamma=0.9)
 
-# print('Saving model......')
-# torch.save(net.state_dict(), '%s/resnet50_normal_init.pth' % (args.outf))
+print('Saving model......')
+torch.save(net.state_dict(), '%s/resnet18_vgg100_normal_init.pth' % (args.outf))
 
 # 训练
 if __name__ == "__main__":
     best_acc = 85  #2 初始化best test accuracy
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
-    with open("normal_train_acc.txt", "a+") as f:
-        with open("normal_train_log.txt", "a+")as f2:
-            checkpoint = torch.load("./model/resnet50_normal_50epoch_050.pth", map_location='cpu')
-            net.load_state_dict(checkpoint)
+    with open("resnet18_vgg100_normal_train_acc.txt", "a+") as f:
+        with open("resnet18_vgg100_normal_train_log.txt", "a+")as f2:
             for epoch in range(pre_epoch, EPOCH):
                 scheduler.step()
                 print('\nEpoch: %d' % (epoch + 1))
@@ -187,9 +190,9 @@ if __name__ == "__main__":
                     print('测试分类准确率为：%.3f%%' % (100. * correct / total))
                     acc = 100. * correct / total
                     # 将每次测试结果实时写入acc.txt文件中
-                    if epoch % 5 == 0:
+                    if epoch % 5 < 1:
                         print('Saving model......')
-                        torch.save(net.state_dict(), '%s/resnet50_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
+                        torch.save(net.state_dict(), '%s/resnet18_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
                     f.write("EPOCH=%03d,Accuracy= %.3f,Time=%s%%" % (epoch + 1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                     f.write('\n')
                     f.flush()
@@ -200,6 +203,6 @@ if __name__ == "__main__":
                         f3.close()
                         best_acc = acc
             print('Saving model......')
-            torch.save(net.state_dict(), '%s/resnet50_normal_80epoch_%03d.pth' % (args.outf, epoch + 1))
+            torch.save(net.state_dict(), '%s/resnet18_normal_30epoch_%03d.pth' % (args.outf, epoch + 1))
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

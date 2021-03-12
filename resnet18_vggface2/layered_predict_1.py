@@ -32,7 +32,7 @@ parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet1
 parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
 parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list2-forget2.txt',
                     help='text file containing image files used for training')
-parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list2.txt',
+parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
                     help='text file containing image files used for validation, test or feature extraction')
 parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
 parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
@@ -131,8 +131,8 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 
 # 模型定义-ResNet
 net = ResNet50().to(device)
-# net = nn.DataParallel(net)
-# net = net.cuda()
+net = nn.DataParallel(net)
+net = net.cuda()
 
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
@@ -142,7 +142,9 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 print("Waiting Test!")
 
 savedFiles = [
-    'resnet50_retrain_50epoch_050.pth'
+    'resnet50_retrain_50epoch_050.pth',
+    'resnet50_normal_80epoch_080.pth',
+    'resnet50_normal_50epoch_050.pth'
 ]
 
 testloader = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)
@@ -164,7 +166,7 @@ with torch.no_grad():
             totals[i] += labels.size(0)
             corrects[i] += (predicted == labels).sum()
     for i, file in enumerate(savedFiles, 0):
-        print(file + '测试分类准确率为：%.3f%%' % (100 * corrects[i] / totals[i]))
+        print(file + '测试分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
 
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
@@ -187,6 +189,6 @@ with torch.no_grad():
             totals[i] += labels.size(0)
             corrects[i] += (predicted == labels).sum()
     for i, file in enumerate(savedFiles, 0):
-        print(file + '测试分类准确率为：%.3f%%' % (100 * corrects[i] / totals[i]))
+        print(file + '测试分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
 
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
