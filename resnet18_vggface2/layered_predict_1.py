@@ -144,7 +144,8 @@ print("Waiting Test!")
 savedFiles = [
     'resnet50_retrain_50epoch_050.pth',
     'resnet50_normal_80epoch_080.pth',
-    'resnet50_normal_50epoch_050.pth'
+    'resnet50_normal_50epoch_050.pth',
+    'resnet50_normal_train_071_epoch.pth'
 ]
 
 testloader = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)

@@ -5,6 +5,8 @@ import torchvision
 import torchvision.transforms as transforms
 import argparse
 from resnet_1 import ResNet50
+import sys
+sys.path.append("..")
 import datasets
 import os
 import utils
@@ -85,9 +87,12 @@ test_img_list_file = args.test_img_list_file
 trainDict = {}
 trainList = []
 testList = []
+
+forget_num = 90
+
 with open(train_img_list_file, 'r') as f:
-    with open('train_list_100_less_for_test.txt', 'w') as f1:
-        with open('test_list_100_less_for_test.txt', 'w') as f2:
+    with open('train_list_100_forget_' + str(forget_num) + '.txt', 'w') as f1:
+        with open('test_list_100_forget_' + str(forget_num) + '.txt', 'w') as f2:
             for i, img_file in enumerate(f):
                 img_file = img_file.strip()  # e.g. train/n004332/0317_01.jpg
                 # class_id = img_file.split("/")[1]  # like n004332
@@ -98,16 +103,19 @@ with open(train_img_list_file, 'r') as f:
                     trainDict[class_id] = [img_file]
             # print(trainDict)
             # exit()
+
+            i = 0
             for key in sorted(trainDict):
+                if i < forget_num:
+                    print('skip %d\n' % i)
+                    i = i + 1
+                    continue
                 listLen = len(trainDict[key])
                 for i, item in enumerate(trainDict[key]):
-                    # if i < listLen * 0.9:
-                    if i < 10:
+                    if i < listLen * 0.9:
                         trainList.append(item)
-                    elif i < 20:
-                        testList.append(item)
                     else:
-                        break
+                        testList.append(item)
             for item in trainList:
                 f1.write(item + "\n")
                 f1.flush()
