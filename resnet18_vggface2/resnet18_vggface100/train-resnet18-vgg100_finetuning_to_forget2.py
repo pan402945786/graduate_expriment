@@ -77,8 +77,8 @@ if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 
 # 超参数设置
-EPOCH = 130   #遍历数据集次数
-pre_epoch = 100  # 定义已经遍历数据集的次数
+EPOCH = 20   #遍历数据集次数
+pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
 # BATCH_SIZE = 40      #批处理尺寸(batch_size)
 BATCH_SIZE = args.batch_size      #批处理尺寸(batch_size)
@@ -90,50 +90,9 @@ id_label_dict = utils.get_id_label_map(meta_file)
 
 # 1. data loader
 root = args.dataset_dir
-train_img_list_file = args.train_img_list_file
-test_img_list_file = args.test_img_list_file
 
 # kwargs = {'num_workers': args.workers, 'pin_memory': True} if cuda else {}
 kwargs = {'num_workers': args.workers, 'pin_memory': False} if cuda else {}
-
-startNum = args.start_num
-endNum = args.end_num
-
-if startNum > endNum or startNum == None:
-    print('start number error')
-    exit()
-
-numberList = []
-start = startNum
-while start < endNum:
-    numberList.append(start)
-    start = start + 10
-numberList.append(endNum)
-print(numberList)
-
-trainFileList = []
-testFileList = []
-for i, item in enumerate(numberList):
-    strTrain = 'train_list_100_forget_' + str(item) + '.txt'
-    strTest = 'test_list_100_forget_' + str(item) + '.txt'
-    trainFileList.append(strTrain)
-    testFileList.append(strTest)
-
-print(trainFileList)
-print(testFileList)
-
-# 准备数据集并预处理
-transform_train = transforms.Compose([
-    transforms.RandomCrop(32, padding=4),  #先四周填充0，在吧图像随机裁剪成32*32
-    transforms.RandomHorizontalFlip(),  #图像一半的概率翻转，一半的概率不翻转
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)), #R,G,B每层的归一化用到的均值和方差
-])
-
-transform_test = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
-])
 
 # 模型定义-ResNet
 net = ResNet18().to(device)
@@ -145,25 +104,74 @@ criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分�
 # print('Saving model......')
 # torch.save(net.state_dict(), '%s/resnet18_vgg100_forget_init.pth' % (args.outf))
 # exit()
+reset_layer_start = args.start_num
+reset_layer_end = args.end_num
+
+layer_count_list = []
+layer_count = reset_layer_start
+while layer_count < reset_layer_end:
+    layer_count_list.append(layer_count)
+    layer_count = layer_count + 1
+layer_count_list.append(reset_layer_end)
+layeredParams = []
+layeredParams.append(["conv1.0.weight", "conv1.1.weight", "conv1.1.bias"])
+layeredParams.append(["layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias", ])
+layeredParams.append(["layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias", ])
+layeredParams.append(["layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias", ])
+layeredParams.append(["layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias", ])
+
+layeredParams.append(["layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias", ])
+layeredParams.append(["layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias", ])
+layeredParams.append(["layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias", ])
+layeredParams.append(["layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",])
+
+layeredParams.append(["layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",])
+layeredParams.append(["layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",])
+layeredParams.append([ "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",])
+layeredParams.append(["layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias"])
+
+layeredParams.append(["layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",])
+layeredParams.append(["layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",])
+layeredParams.append(["layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias",])
+layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",])
+
+layeredParams.append(["fc.weight", "fc.bias",])
+
+preparedFrozenLayers = []
+for i, item in enumerate(layer_count_list):
+    frozenLayer = []
+    for j in range(18-item):
+        frozenLayer = frozenLayer + layeredParams[j]
+    preparedFrozenLayers.append(frozenLayer)
+
+savedFiles = [
+    'resnet18_70epoch_reset_fc_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv1_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv2_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv3_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv4_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv5_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv6_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv7_before_training.pth',
+    'resnet18_70epoch_reset_fc_conv8_before_training.pth',
+]
+
+trainFile = 'train_list_100_forget_20.txt'
+testFile = 'test_list_100_forget_20.txt'
+
 # 训练
 if __name__ == "__main__":
     best_acc = 85  #2 初始化best test accuracy
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
-    for i, item in enumerate(trainFileList):
-        trainset = VGG_Faces2(root, item, id_label_dict, split='train')
+    for i, item in enumerate(layer_count_list):
+        trainset = VGG_Faces2(root, trainFile, id_label_dict, split='train')
         trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True,
                                                   num_workers=2)  # 生成一个个batch进行批训练，组成batch的时候顺序打乱取
         print(len(trainset))
-        testset = VGG_Faces2(root, testFileList[i], id_label_dict, split='valid')
+        testset = VGG_Faces2(root, testFile, id_label_dict, split='valid')
         print(len(testset))
         testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
         # optimizer初始化
-        if '70' in item:
-            LR = 0.025
-        elif '80' in item:
-            LR = 0.025
-        elif '90' in item:
-            LR = 0.0125
         optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9,
                               weight_decay=5e-4)  # 优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
         # scheduler初始化
@@ -172,29 +180,26 @@ if __name__ == "__main__":
                                       eps=1e-08)
         # 网络参数初始化
         # checkpoint = torch.load("./model/resnet18_vgg100_forget_init.pth", map_location='cpu')
-        checkpoint = torch.load(args.outf +item+'_retrain_40epoch_100.pth', map_location='cpu')
+        checkpoint = torch.load(args.outf + savedFiles[item-1], map_location='cpu')
         net.load_state_dict(checkpoint)
-        print(item)
-        # 冻结相关层
-        frozenLayers = []
-        for j in range(0, 8 - k):
-            frozenLayers = frozenLayers + layeredParams[j]
+        print('load files:')
+        print(savedFiles[item-1])
 
+        # 冻结相关层
         frozenIndex = []
-        i = 0
+        paramCount = 0
         for name, param in net.named_parameters():
-            if name in frozenLayers:
-                frozenIndex.append(i)
-            i = i + 1
+            if name in preparedFrozenLayers[i]:
+                frozenIndex.append(paramCount)
+            paramCount = paramCount + 1
         j = 0
         for param in net.parameters():
             param.requires_grad = True
             if j in frozenIndex:
                 param.requires_grad = False  # 冻结网络
             j = j + 1
-
-        with open(item + "_acc.txt", "a+") as f:
-            with open(item + "_log.txt", "a+")as f2:
+        with open(savedFiles[item-1] + "_acc.txt", "a+") as f:
+            with open(savedFiles[item-1] + "_log.txt", "a+")as f2:
                 for epoch in range(pre_epoch, EPOCH):
                     # scheduler.step()
                     print('\nEpoch: %d' % (epoch + 1))
@@ -224,7 +229,7 @@ if __name__ == "__main__":
                         total += labels.size(0)
                         correct += predicted.eq(labels.data).cpu().sum()
                         print('[epoch:%d, iter:%d] Loss: %.03f | Acc: %.3f%% | Time: %s | File: %s'
-                              % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), item) )
+                              % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), savedFiles[item-1]) )
                         f2.write('%03d  %05d |Loss: %.03f | Acc: %.3f%% | Time: %s'
                               % (epoch + 1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                         f2.write('\n')
@@ -250,12 +255,12 @@ if __name__ == "__main__":
                         # 将每次测试结果实时写入acc.txt文件中
                         if epoch % 5 < 1:
                             print('Saving model......')
-                            torch.save(net.state_dict(), args.outf + '/'+item+'_retrain_40epoch_'+str(epoch)+'.pth')
+                            torch.save(net.state_dict(), args.outf + '/'+savedFiles[item-1]+'_finetuning_'+str(epoch)+'.pth')
                         f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f" % (epoch + 1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), optimizer.state_dict()['param_groups'][0]['lr']))
                         f.write('\n')
                         f.flush()
                     scheduler.step(loss_val, epoch=epoch)
                 print('Saving model......')
-                torch.save(net.state_dict(), args.outf + '/'+item+'_retrain_40epoch_'+str(epoch+1)+'.pth')
+                torch.save(net.state_dict(), args.outf + '/'+savedFiles[item-1]+'_after_finetuning_'+str(epoch+1)+'.pth')
                 print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

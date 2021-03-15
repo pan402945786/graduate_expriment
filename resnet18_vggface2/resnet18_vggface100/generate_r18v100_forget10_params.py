@@ -37,12 +37,12 @@ transform_test = transforms.Compose([
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
 
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train) #训练数据集
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)   #生成一个个batch进行批训练，组成batch的时候顺序打乱取
-print(len(trainset))
-
-testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
-testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
+# trainset = torchvision.datasets.CIFAR10(root='./data', train=True, download=True, transform=transform_train) #训练数据集
+# trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)   #生成一个个batch进行批训练，组成batch的时候顺序打乱取
+# print(len(trainset))
+#
+# testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=True, transform=transform_test)
+# testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
 # Cifar-10的标签
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 # 模型定义-ResNet
@@ -121,18 +121,15 @@ initLayers = [
               "fc.weight", "fc.bias",
               "layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",
               "layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias",
-              "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",
-              "layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias",
+              "layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",
               "layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",
               "layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias",
               "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",
-              "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",
-              "layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias",
+              "layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",
               "layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",
-              "layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",
+              # "layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",
               # "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
-              # "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
-              # "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias",
+              # "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
               # "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
               # "layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",
               # "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
@@ -140,7 +137,7 @@ initLayers = [
               # "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
               # "conv1.0.weight", "conv1.1.weight", "conv1.1.bias",
               ]
-fileName = "resnet18_70epoch_reset_fc_conv9_before_training.pth"
+fileName = "resnet18_70epoch_reset_fc_conv8_before_training.pth"
 print(fileName)
 for k in checkpoint.keys():
     if k in initLayers:
