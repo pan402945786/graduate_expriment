@@ -4,7 +4,10 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import argparse
-from resnet import ResNet18
+import sys
+sys.path.append("..")
+from resnet_1 import ResNet18
+import collections
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -77,10 +80,14 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 
 # print('Saving model......')
 # torch.save(net.state_dict(), '%s/init_model.pth' % (args.outf))
-
+# exit()
 toLoad = {}
-checkpoint = torch.load("./model/net_135.pth", map_location='cpu')
-net.load_state_dict(checkpoint)
+checkpoint = torch.load("./model/resnet18_vggface100_normal_056_epoch.pth", map_location='cpu')
+# print(checkpoint)
+# checkpoint = torch.load("./model/init_model.pth", map_location='cpu')
+
+d2 = collections.OrderedDict([(k.replace('module.', ''), v) for k, v in checkpoint.items()])
+net.load_state_dict(d2)
 params = net.state_dict()
 toLoad = params
 # for k,v in params.items():
@@ -123,17 +130,17 @@ initLayers = [
               "layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias",
               "layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",
               "layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",
-              "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
-              "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
-              "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias",
-              "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
-              "layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",
-              "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
-              "layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias",
-              "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
+              # "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
+              # "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
+              # "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias",
+              # "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
+              # "layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",
+              # "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
+              # "layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias",
+              # "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
               # "conv1.0.weight", "conv1.1.weight", "conv1.1.bias",
               ]
-fileName = "net_reset_fc_conv16_before_training.pth"
+fileName = "resnet18_70epoch_reset_fc_conv9_before_training.pth"
 print(fileName)
 for k in checkpoint.keys():
     if k in initLayers:

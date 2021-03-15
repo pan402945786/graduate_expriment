@@ -73,8 +73,8 @@ cuda = torch.cuda.is_available()
 if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 # 超参数设置
-EPOCH = 70   #遍历数据集次数
-pre_epoch = 0  # 定义已经遍历数据集的次数
+EPOCH = 60   #遍历数据集次数
+pre_epoch = 40  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
 BATCH_SIZE = 30      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
