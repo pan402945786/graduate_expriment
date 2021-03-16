@@ -12,6 +12,7 @@ import datasets
 import os
 import time
 import utils
+import collections
 from vgg_face2 import VGG_Faces2
 from lr_scheduler_temp import ReduceLROnPlateau
 
@@ -40,34 +41,34 @@ parser.add_argument('--arch_type', type=str, default='resnet50_ft', help='model 
 # parser.add_argument('--feature_dir', type=str, default=r'D:\ww2/graduate_experiment/resnet18_vggface2\features/test',
 #                     help='directory where extracted features are saved')
 
-parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
-parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
-parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list_100.txt',
-                    help='text file containing image files used for training')
-# parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list_100_less_for_test.txt',
+# parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
+# parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
+# parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list_100.txt',
 #                     help='text file containing image files used for training')
-parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
-                    help='text file containing image files used for validation, test or feature extraction')
-parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
-parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
-                    help='checkpoints directory')
-parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
-                    help='directory where extracted features are saved')
-
-# parser.add_argument('--dataset_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/root', help='dataset directory')
-# parser.add_argument('--log_file', type=str, default=r'/media/public/ml/resnet18_vggface2/logs/logs.log', help='log file')
-# parser.add_argument('--train_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/train_list_100.txt',
-#                     help='text file containing image files used for training')
-# # parser.add_argument('--train_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/train_list_100_less_for_test.txt',
+# # parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list_100_less_for_test.txt',
 # #                     help='text file containing image files used for training')
-# parser.add_argument('--test_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
+# parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
 #                     help='text file containing image files used for validation, test or feature extraction')
-# parser.add_argument('--meta_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
-# # parser.add_argument('--meta_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
-# parser.add_argument('--checkpoint_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/weight/checkpoints',
+# parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+# parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
 #                     help='checkpoints directory')
-# parser.add_argument('--feature_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/features/test',
+# parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
 #                     help='directory where extracted features are saved')
+
+parser.add_argument('--dataset_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/root', help='dataset directory')
+parser.add_argument('--log_file', type=str, default=r'/media/public/ml/resnet18_vggface2/logs/logs.log', help='log file')
+parser.add_argument('--train_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/train_list_100.txt',
+                    help='text file containing image files used for training')
+# parser.add_argument('--train_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/train_list_100_less_for_test.txt',
+#                     help='text file containing image files used for training')
+parser.add_argument('--test_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
+                    help='text file containing image files used for validation, test or feature extraction')
+parser.add_argument('--meta_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+# parser.add_argument('--meta_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+parser.add_argument('--checkpoint_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/weight/checkpoints',
+                    help='checkpoints directory')
+parser.add_argument('--feature_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/features/test',
+                    help='directory where extracted features are saved')
 
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--start_num', type=int, default=10, help='start number')
@@ -130,28 +131,6 @@ while layer_count < reset_layer_end:
     layer_count = layer_count + 1
 layer_count_list.append(reset_layer_end)
 layeredParams = []
-# layeredParams.append(["conv1.0.weight", "conv1.1.weight", "conv1.1.bias"])
-# layeredParams.append(["layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias", ])
-# layeredParams.append(["layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias", ])
-# layeredParams.append(["layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias", ])
-# layeredParams.append(["layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias", ])
-#
-# layeredParams.append(["layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias", ])
-# layeredParams.append(["layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias", ])
-# layeredParams.append(["layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias", ])
-# layeredParams.append(["layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",])
-#
-# layeredParams.append(["layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",])
-# layeredParams.append(["layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",])
-# layeredParams.append([ "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",])
-# layeredParams.append(["layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias"])
-#
-# layeredParams.append(["layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",])
-# layeredParams.append(["layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",])
-# layeredParams.append(["layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias",])
-# layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",])
-#
-# layeredParams.append(["fc.weight", "fc.bias",])
 
 layeredParams.append(["conv1.0.weight",
 "conv1.1.weight",
@@ -364,36 +343,36 @@ layeredParams.append(["fc.weight",
 preparedFrozenLayers = []
 for i, item in enumerate(layer_count_list):
     frozenLayer = []
-    for j in range(18-item):
+    for j in range(50-item):
         frozenLayer = frozenLayer + layeredParams[j]
     preparedFrozenLayers.append(frozenLayer)
 
 savedFiles = [
-    'resnet50_60epoch_reset_fc_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv1_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv2_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv3_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv4_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv5_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv6_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv7_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv8_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv9_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv10_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv11_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv12_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv13_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv14_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv15_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv16_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv17_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv18_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv19_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv20_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv21_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv22_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv23_before_training.pth',
-    'resnet50_60epoch_reset_fc_conv24_before_training.pth',
+    'resnet50_70epoch_reset_fc_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv1_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv2_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv3_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv4_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv5_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv6_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv7_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv8_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv9_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv10_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv11_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv12_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv13_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv14_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv15_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv16_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv17_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv18_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv19_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv20_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv21_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv22_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv23_before_training.pth',
+    'resnet50_70epoch_reset_fc_conv24_before_training.pth',
 ]
 
 trainFile = 'train_list_100_forget_20.txt'
@@ -412,24 +391,24 @@ if __name__ == "__main__":
         print(len(testset))
         testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
         # optimizer初始化
-        if item == 1:
-            LR = 0.0125
-        elif item == 2:
-            LR = 0.1
-        elif item == 3:
-            LR = 0.05
-        elif item == 4:
-            LR = 0.05
-        elif item == 5:
-            LR = 0.05
-        elif item == 6:
-            LR = 0.1
-        elif item == 7:
-            LR = 0.05
-        elif item == 8:
-            LR = 0.05
-        elif item == 9:
-            LR = 0.025
+        # if item == 1:
+        #     LR = 0.0125
+        # elif item == 2:
+        #     LR = 0.1
+        # elif item == 3:
+        #     LR = 0.05
+        # elif item == 4:
+        #     LR = 0.05
+        # elif item == 5:
+        #     LR = 0.05
+        # elif item == 6:
+        #     LR = 0.1
+        # elif item == 7:
+        #     LR = 0.05
+        # elif item == 8:
+        #     LR = 0.05
+        # elif item == 9:
+        #     LR = 0.025
 
         optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9,
                               weight_decay=5e-4)  # 优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
@@ -441,7 +420,9 @@ if __name__ == "__main__":
                                       eps=1e-08)
         # 网络参数初始化
         # checkpoint = torch.load("./model/resnet18_vgg100_forget_init.pth", map_location='cpu')
-        checkpoint = torch.load(args.outf + savedFiles[item-1]+'_after_finetuning_20.pth', map_location='cpu')
+        # checkpoint = torch.load(args.outf + savedFiles[item-1]+'_after_finetuning_20.pth', map_location='cpu')
+        checkpoint = torch.load("./model/" + savedFiles[item-1], map_location='cpu')
+        # checkpoint = collections.OrderedDict([('module.' + k, v) for k, v in checkpoint.items()])
         net.load_state_dict(checkpoint)
         print('load files:')
         print(savedFiles[item-1])

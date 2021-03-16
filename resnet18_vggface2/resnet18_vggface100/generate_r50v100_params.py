@@ -248,6 +248,9 @@ initLayers = [
     # "layer3.0.shortcut.1.weight",
     # "layer3.0.shortcut.1.bias",
 
+
+
+
     "layer3.1.left.0.weight",
     "layer3.1.left.1.weight",
     "layer3.1.left.1.bias",
@@ -351,11 +354,11 @@ initLayers = [
     "fc.bias"
 ]
 
-fileName = "resnet50_60epoch_reset_fc_conv24_before_training.pth"
+fileName = "resnet50_70epoch_reset_fc_conv24_before_training.pth"
 print(fileName)
 for k in checkpoint.keys():
-    if k in initLayers:
-        toLoad[k] = checkpoint[k]
+    if k.replace('module.', '') in initLayers:
+        toLoad[k.replace('module.', '')] = checkpoint[k]
         print("added:" + k)
 net.load_state_dict(toLoad)
 params=net.state_dict()
