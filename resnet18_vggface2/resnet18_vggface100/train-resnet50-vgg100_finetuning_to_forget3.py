@@ -500,7 +500,7 @@ if __name__ == "__main__":
                         f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f" % (epoch + 1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), optimizer.state_dict()['param_groups'][0]['lr']))
                         f.write('\n')
                         f.flush()
-                    # scheduler.step(loss_val, epoch=epoch)
+                    scheduler.step(loss_val, epoch=epoch)
                 print('Saving model......')
                 torch.save(net.state_dict(), args.outf + '/'+savedFiles[item-1]+'_after_finetuning_'+str(epoch+1)+'.pth')
                 print("Training Finished, TotalEPOCH=%d" % EPOCH)
