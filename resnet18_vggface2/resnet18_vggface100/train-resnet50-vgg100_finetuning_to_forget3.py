@@ -93,8 +93,8 @@ if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 
 # 超参数设置
-EPOCH = 40   #遍历数据集次数
-pre_epoch = 20  # 定义已经遍历数据集的次数
+EPOCH = 20   #遍历数据集次数
+pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
 # BATCH_SIZE = 40      #批处理尺寸(batch_size)
 BATCH_SIZE = args.batch_size      #批处理尺寸(batch_size)
@@ -111,8 +111,8 @@ root = args.dataset_dir
 kwargs = {'num_workers': args.workers, 'pin_memory': False} if cuda else {}
 
 # 模型定义-ResNet
-net = ResNet18().to(device)
-# net = ResNet50().to(device)
+# net = ResNet18().to(device)
+net = ResNet50().to(device)
 # net = nn.DataParallel(net)
 # net = net.cuda()
 # 定义损失函数和优化方式
@@ -130,28 +130,236 @@ while layer_count < reset_layer_end:
     layer_count = layer_count + 1
 layer_count_list.append(reset_layer_end)
 layeredParams = []
-layeredParams.append(["conv1.0.weight", "conv1.1.weight", "conv1.1.bias"])
-layeredParams.append(["layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias", ])
-layeredParams.append(["layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias", ])
-layeredParams.append(["layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias", ])
-layeredParams.append(["layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias", ])
+# layeredParams.append(["conv1.0.weight", "conv1.1.weight", "conv1.1.bias"])
+# layeredParams.append(["layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias", ])
+# layeredParams.append(["layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias", ])
+# layeredParams.append(["layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias", ])
+# layeredParams.append(["layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias", ])
+#
+# layeredParams.append(["layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias", ])
+# layeredParams.append(["layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias", ])
+# layeredParams.append(["layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias", ])
+# layeredParams.append(["layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",])
+#
+# layeredParams.append(["layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",])
+# layeredParams.append(["layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",])
+# layeredParams.append([ "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",])
+# layeredParams.append(["layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias"])
+#
+# layeredParams.append(["layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",])
+# layeredParams.append(["layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",])
+# layeredParams.append(["layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias",])
+# layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",])
+#
+# layeredParams.append(["fc.weight", "fc.bias",])
 
-layeredParams.append(["layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias", ])
-layeredParams.append(["layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias", ])
-layeredParams.append(["layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias", ])
-layeredParams.append(["layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",])
+layeredParams.append(["conv1.0.weight",
+"conv1.1.weight",
+"conv1.1.bias",])
 
-layeredParams.append(["layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",])
-layeredParams.append(["layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",])
-layeredParams.append([ "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",])
-layeredParams.append(["layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias"])
+layeredParams.append(["layer1.0.left.0.weight",
+"layer1.0.left.1.weight",
+"layer1.0.left.1.bias",])
 
-layeredParams.append(["layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",])
-layeredParams.append(["layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",])
-layeredParams.append(["layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias",])
-layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",])
+layeredParams.append(["layer1.0.left.2.weight",
+"layer1.0.left.3.weight",
+"layer1.0.left.3.bias",])
 
-layeredParams.append(["fc.weight", "fc.bias",])
+layeredParams.append(["layer1.0.left.4.weight",
+"layer1.0.left.5.weight",
+"layer1.0.left.5.bias",])
+
+layeredParams.append(["layer1.1.left.0.weight",
+"layer1.1.left.1.weight",
+"layer1.1.left.1.bias",])
+
+layeredParams.append(["layer1.1.left.2.weight",
+"layer1.1.left.3.weight",
+"layer1.1.left.3.bias",])
+
+layeredParams.append(["layer1.1.left.4.weight",
+"layer1.1.left.5.weight",
+"layer1.1.left.5.bias",])
+
+layeredParams.append(["layer1.2.left.0.weight",
+"layer1.2.left.1.weight",
+"layer1.2.left.1.bias",])
+
+layeredParams.append(["layer1.2.left.2.weight",
+"layer1.2.left.3.weight",
+"layer1.2.left.3.bias",])
+
+layeredParams.append(["layer1.2.left.4.weight",
+"layer1.2.left.5.weight",
+"layer1.2.left.5.bias",])
+
+layeredParams.append(["layer2.0.left.0.weight",
+"layer2.0.left.1.weight",
+"layer2.0.left.1.bias",])
+
+layeredParams.append(["layer2.0.left.2.weight",
+"layer2.0.left.3.weight",
+"layer2.0.left.3.bias",])
+
+layeredParams.append(["layer2.0.left.4.weight",
+"layer2.0.left.5.weight",
+"layer2.0.left.5.bias",
+"layer2.0.shortcut.0.weight",
+"layer2.0.shortcut.1.weight",
+"layer2.0.shortcut.1.bias",])
+
+layeredParams.append(["layer2.1.left.0.weight",
+"layer2.1.left.1.weight",
+"layer2.1.left.1.bias",])
+
+layeredParams.append(["layer2.1.left.2.weight",
+"layer2.1.left.3.weight",
+"layer2.1.left.3.bias",])
+
+layeredParams.append(["layer2.1.left.4.weight",
+"layer2.1.left.5.weight",
+"layer2.1.left.5.bias",])
+
+layeredParams.append(["layer2.2.left.0.weight",
+"layer2.2.left.1.weight",
+"layer2.2.left.1.bias",])
+
+layeredParams.append(["layer2.2.left.2.weight",
+"layer2.2.left.3.weight",
+"layer2.2.left.3.bias",])
+
+layeredParams.append(["layer2.2.left.4.weight",
+"layer2.2.left.5.weight",
+"layer2.2.left.5.bias",])
+
+layeredParams.append(["layer2.3.left.0.weight",
+"layer2.3.left.1.weight",
+"layer2.3.left.1.bias",])
+
+layeredParams.append(["layer2.3.left.2.weight",
+"layer2.3.left.3.weight",
+"layer2.3.left.3.bias",])
+
+layeredParams.append(["layer2.3.left.4.weight",
+"layer2.3.left.5.weight",
+"layer2.3.left.5.bias",])
+
+layeredParams.append(["layer3.0.left.0.weight",
+"layer3.0.left.1.weight",
+"layer3.0.left.1.bias",])
+
+layeredParams.append(["layer3.0.left.2.weight",
+"layer3.0.left.3.weight",
+"layer3.0.left.3.bias",])
+
+layeredParams.append(["layer3.0.left.4.weight",
+"layer3.0.left.5.weight",
+"layer3.0.left.5.bias",
+"layer3.0.shortcut.0.weight",
+"layer3.0.shortcut.1.weight",
+"layer3.0.shortcut.1.bias",])
+
+layeredParams.append(["layer3.1.left.0.weight",
+"layer3.1.left.1.weight",
+"layer3.1.left.1.bias",])
+
+layeredParams.append(["layer3.1.left.2.weight",
+"layer3.1.left.3.weight",
+"layer3.1.left.3.bias",])
+
+layeredParams.append(["layer3.1.left.4.weight",
+"layer3.1.left.5.weight",
+"layer3.1.left.5.bias",])
+
+layeredParams.append(["layer3.2.left.0.weight",
+"layer3.2.left.1.weight",
+"layer3.2.left.1.bias",])
+
+layeredParams.append(["layer3.2.left.2.weight",
+"layer3.2.left.3.weight",
+"layer3.2.left.3.bias",])
+
+layeredParams.append(["layer3.2.left.4.weight",
+"layer3.2.left.5.weight",
+"layer3.2.left.5.bias",])
+
+layeredParams.append(["layer3.3.left.0.weight",
+"layer3.3.left.1.weight",
+"layer3.3.left.1.bias",])
+
+layeredParams.append(["layer3.3.left.2.weight",
+"layer3.3.left.3.weight",
+"layer3.3.left.3.bias",])
+
+layeredParams.append(["layer3.3.left.4.weight",
+"layer3.3.left.5.weight",
+"layer3.3.left.5.bias",])
+
+layeredParams.append(["layer3.4.left.0.weight",
+"layer3.4.left.1.weight",
+"layer3.4.left.1.bias",])
+
+layeredParams.append(["layer3.4.left.2.weight",
+"layer3.4.left.3.weight",
+"layer3.4.left.3.bias",])
+
+layeredParams.append(["layer3.4.left.4.weight",
+"layer3.4.left.5.weight",
+"layer3.4.left.5.bias",])
+
+layeredParams.append(["layer3.5.left.0.weight",
+"layer3.5.left.1.weight",
+"layer3.5.left.1.bias",])
+
+layeredParams.append(["layer3.5.left.2.weight",
+"layer3.5.left.3.weight",
+"layer3.5.left.3.bias",])
+
+layeredParams.append(["layer3.5.left.4.weight",
+"layer3.5.left.5.weight",
+"layer3.5.left.5.bias",])
+
+layeredParams.append(["layer4.0.left.0.weight",
+"layer4.0.left.1.weight",
+"layer4.0.left.1.bias",])
+
+layeredParams.append(["layer4.0.left.2.weight",
+"layer4.0.left.3.weight",
+"layer4.0.left.3.bias",])
+
+layeredParams.append(["layer4.0.left.4.weight",
+"layer4.0.left.5.weight",
+"layer4.0.left.5.bias",
+"layer4.0.shortcut.0.weight",
+"layer4.0.shortcut.1.weight",
+"layer4.0.shortcut.1.bias",])
+
+layeredParams.append(["layer4.1.left.0.weight",
+"layer4.1.left.1.weight",
+"layer4.1.left.1.bias",])
+
+layeredParams.append(["layer4.1.left.2.weight",
+"layer4.1.left.3.weight",
+"layer4.1.left.3.bias",])
+
+layeredParams.append(["layer4.1.left.4.weight",
+"layer4.1.left.5.weight",
+"layer4.1.left.5.bias",])
+
+layeredParams.append(["layer4.2.left.0.weight",
+"layer4.2.left.1.weight",
+"layer4.2.left.1.bias",])
+
+layeredParams.append(["layer4.2.left.2.weight",
+"layer4.2.left.3.weight",
+"layer4.2.left.3.bias",])
+
+layeredParams.append(["layer4.2.left.4.weight",
+"layer4.2.left.5.weight",
+"layer4.2.left.5.bias",])
+
+layeredParams.append(["fc.weight",
+"fc.bias"])
 
 preparedFrozenLayers = []
 for i, item in enumerate(layer_count_list):
@@ -161,15 +369,31 @@ for i, item in enumerate(layer_count_list):
     preparedFrozenLayers.append(frozenLayer)
 
 savedFiles = [
-    'resnet18_70epoch_reset_fc_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv1_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv2_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv3_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv4_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv5_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv6_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv7_before_training.pth',
-    'resnet18_70epoch_reset_fc_conv8_before_training.pth',
+    'resnet50_60epoch_reset_fc_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv1_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv2_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv3_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv4_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv5_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv6_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv7_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv8_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv9_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv10_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv11_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv12_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv13_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv14_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv15_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv16_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv17_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv18_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv19_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv20_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv21_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv22_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv23_before_training.pth',
+    'resnet50_60epoch_reset_fc_conv24_before_training.pth',
 ]
 
 trainFile = 'train_list_100_forget_20.txt'
