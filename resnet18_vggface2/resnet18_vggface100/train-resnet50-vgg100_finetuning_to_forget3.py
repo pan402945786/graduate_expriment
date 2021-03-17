@@ -470,9 +470,9 @@ if __name__ == "__main__":
                         total += labels.size(0)
                         correct += predicted.eq(labels.data).cpu().sum()
                         print('[epoch:%d, iter:%d] Loss: %.03f | Acc: %.3f%% | Time: %s | File: %s'
-                              % (epoch + 1, (k + 1 + epoch * length), sum_loss / (k + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), savedFiles[item-1]) )
+                              % (epoch, (k + 1 + (epoch-1) * length), sum_loss / (k + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), savedFiles[item-1]) )
                         f2.write('%03d  %05d |Loss: %.03f | Acc: %.3f%% | Time: %s'
-                              % (epoch + 1, (k + 1 + epoch * length), sum_loss / (k + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
+                              % (epoch, (k + 1 + (epoch-1) * length), sum_loss / (k + 1), 100. * correct / total, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())))
                         f2.write('\n')
                         f2.flush()
 
@@ -497,7 +497,7 @@ if __name__ == "__main__":
                         if epoch % 5 < 1 and pre_epoch != epoch:
                             print('Saving model......')
                             torch.save(net.state_dict(), args.outf + '/'+savedFiles[item-1]+'_finetuning_'+str(epoch)+'.pth')
-                        f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f" % (epoch + 1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), optimizer.state_dict()['param_groups'][0]['lr']))
+                        f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f" % (epoch, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), optimizer.state_dict()['param_groups'][0]['lr']))
                         f.write('\n')
                         f.flush()
                     scheduler.step(loss_val, epoch=epoch)
