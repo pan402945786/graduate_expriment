@@ -442,7 +442,7 @@ if __name__ == "__main__":
             j = j + 1
         with open(savedFiles[item-1] + "_acc.txt", "a+") as f:
             with open(savedFiles[item-1] + "_log.txt", "a+")as f2:
-                for epoch in range(pre_epoch+1, EPOCH):
+                for epoch in range(pre_epoch+1, EPOCH+1):
                     # scheduler.step()
                     print('\nEpoch: %d' % epoch)
                     net.train()
@@ -502,6 +502,6 @@ if __name__ == "__main__":
                         f.flush()
                     scheduler.step(loss_val, epoch=epoch)
                 print('Saving model......')
-                torch.save(net.state_dict(), args.outf + '/'+savedFiles[item-1]+'_after_finetuning_'+str(epoch+1)+'.pth')
+                torch.save(net.state_dict(), args.outf + '/'+savedFiles[item-1]+'_after_finetuning_'+str(epoch)+'.pth')
                 print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

@@ -62,6 +62,7 @@ parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet1
 # #                     help='text file containing image files used for training')
 # parser.add_argument('--test_img_list_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
 #                     help='text file containing image files used for validation, test or feature extraction')
+#                     help='text file containing image files used for validation, test or feature extraction')
 # parser.add_argument('--meta_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
 # # parser.add_argument('--meta_file', type=str, default=r'/media/public/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
 # parser.add_argument('--checkpoint_dir', type=str, default=r'/media/public/ml/resnet18_vggface2/weight/checkpoints',
