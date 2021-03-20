@@ -4,11 +4,13 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import argparse
-import utils
-import datasets
-from resnet_1 import ResNet50
+import sys
+sys.path.append("..")
+from common import utils
+from common import datasets
+from common.resnet_1 import ResNet50
+from common.resnet_1 import ResNet18
 import os
-from vgg_face2 import VGG_Faces2
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -17,26 +19,26 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 
 parser.add_argument('--outf', default='./model/', help='folder to output images and model checkpoints') #输出结果保存路径
-parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
-parser.add_argument('--dataset_dir', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\root', help='dataset directory')
-parser.add_argument('--train_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\train_list_100.txt',
-                    help='text file containing image files used for training')
-parser.add_argument('--test_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\test_list_100.txt',
-                    help='text file containing image files used for validation, test or feature extraction')
-parser.add_argument('--meta_file', type=str, default=r'D:\ww2\graduate_expriment/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
-
-
-# parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
-# parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
-# parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list2-forget2.txt',
+# parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
+# parser.add_argument('--dataset_dir', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\root', help='dataset directory')
+# parser.add_argument('--train_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\train_list_100.txt',
 #                     help='text file containing image files used for training')
-# parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
+# parser.add_argument('--test_img_list_file', type=str, default=r'D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data\test_list_100.txt',
 #                     help='text file containing image files used for validation, test or feature extraction')
-# parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
-# parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
-#                     help='checkpoints directory')
-# parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
-#                     help='directory where extracted features are saved')
+# parser.add_argument('--meta_file', type=str, default=r'D:\ww2\graduate_expriment/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+
+
+parser.add_argument('--dataset_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/train', help='dataset directory')
+parser.add_argument('--log_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/logs/logs.log', help='log file')
+parser.add_argument('--train_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/train_list2-forget2.txt',
+                    help='text file containing image files used for training')
+parser.add_argument('--test_img_list_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/test_list_100.txt',
+                    help='text file containing image files used for validation, test or feature extraction')
+parser.add_argument('--meta_file', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/datasets/data/meta/identity_meta2.csv', help='meta file')
+parser.add_argument('--checkpoint_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/weight/checkpoints',
+                    help='checkpoints directory')
+parser.add_argument('--feature_dir', type=str, default=r'/home/ubuntu/ml/resnet18_vggface2/features/test',
+                    help='directory where extracted features are saved')
 
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--resume', type=str, default='', help='checkpoint file')
@@ -97,25 +99,12 @@ kwargs = {'num_workers': args.workers, 'pin_memory': False} if cuda else {}
 # trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2)   #生成一个个batch进行批训练，组成batch的时候顺序打乱取
 # print(len(trainset))
 
-# testset = torchvision.datasets.CIFAR10(root='./data', train=False, download=False, transform=transform_test)
+testset = torchvision.datasets.CIFAR10(root='../data', train=False, download=False, transform=transform_test)
 # testset = datasets.VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
-testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
+# testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
 
 # 输入要删除的类别
-# selectedClasses = [0, 1, 2, 3, 4, 6, 7, 8]
-forgetClasses = [1]
-# selectedClassesStr = []
-# for i in range(len(selectedClasses)):
-#     selectedClassesStr.append(str(selectedClasses[i]))
-# # 选择删除类别的训练数据集
-# selectedTrainSet = []
-# selectedTestSet = []
-# for i in range(len(trainset)):
-#     if trainset[i][1] in selectedClasses:
-#         selectedTrainSet.append(trainset[i])
-#
-# testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
-
+forgetClasses = [8, 9]
 forgottenExamples = []
 unforgottenExamples = []
 for i, item in enumerate(testset):
@@ -128,7 +117,8 @@ for i, item in enumerate(testset):
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # 模型定义-ResNet
-net = ResNet50().to(device)
+net = ResNet18().to(device)
+# net = ResNet50().to(device)
 # net = nn.DataParallel(net)
 # net = net.cuda()
 
@@ -140,10 +130,14 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 print("Waiting Test!")
 
 savedFiles = [
-    'resnet50_retrain_50epoch_050.pth',
-    'resnet50_normal_80epoch_080.pth',
-    'resnet50_normal_50epoch_050.pth',
-    'resnet50_normal_train_071_epoch.pth'
+    'resnet18_cifar10_normal_train_finished_saving_60.pth',
+    'resnet18_cifar10_noraml_train_init.pth',
+    'resnet18_cifar10_fc_before_training.pth',
+    'resnet18_cifar10_forget_two_kinds_35.pth',
+    'resnet18_cifar10_forget_two_kinds_35.pth',
+    'resnet18_cifar10_forget_two_kinds_35.pth',
+    'resnet18_cifar10_forget_two_kinds_35.pth',
+    'resnet18_cifar10_fc_before_training.pth_after_finetuning_20.pth'
 ]
 
 testloader = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)

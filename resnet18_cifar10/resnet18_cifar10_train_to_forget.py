@@ -24,10 +24,10 @@ parser.add_argument('--end_num', type=int, default=9, help='end number to forget
 args = parser.parse_args()
 
 # 超参数设置
-EPOCH = 20   #遍历数据集次数
+EPOCH = 10   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-BATCH_SIZE = args.batch_size      #批处理尺寸(batch_size)
+BATCH_SIZE = 128      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
 
 reset_layer_start = args.start_num
