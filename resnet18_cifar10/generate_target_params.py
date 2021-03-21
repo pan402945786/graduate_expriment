@@ -36,17 +36,17 @@ initLayers = [
               "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",
               "layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",
               "layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",
-              # "layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",
-              # "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
-              # "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
-              # "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
-              # "layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",
-              # "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
-              # "layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias",
-              # "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
-              # "conv1.0.weight", "conv1.1.weight", "conv1.1.bias",
+              "layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",
+              "layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias",
+              "layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias",
+              "layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias",
+              "layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias",
+              "layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias",
+              "layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias",
+              "layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias",
+              "conv1.0.weight", "conv1.1.weight", "conv1.1.bias",
               ]
-fileName = "resnet18_cifar10_fc_conv8_before_training.pth"
+fileName = "resnet18_cifar10_fc_conv17_before_training.pth"
 print(fileName)
 for k in checkpoint.keys():
     if k in initLayers:

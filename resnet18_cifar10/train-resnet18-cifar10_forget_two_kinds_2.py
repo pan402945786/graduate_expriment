@@ -20,7 +20,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--outf', default='./model/', help='folder to output images and model checkpoints') #输出结果保存路径
 parser.add_argument('--net', default='./model/Resnet18.pth', help="path to net (to continue training)")  #恢复训练时的模型路径
-parser.add_argument('--batch_size', type=int, default=32, help='batch size')
+parser.add_argument('--batch_size', type=int, default=100, help='batch size')
 
 args = parser.parse_args()
 print(args)
@@ -33,7 +33,7 @@ if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 
 # 超参数设置
-EPOCH = 60   #遍历数据集次数
+EPOCH = 40   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
 # BATCH_SIZE = 40      #批处理尺寸(batch_size)
@@ -159,12 +159,14 @@ if __name__ == "__main__":
                     # 将每次测试结果实时写入acc.txt文件中
                     if epoch % 5 < 1 and pre_epoch != epoch:
                         print('Saving model......')
-                        torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_forget_two_kinds_'+str(epoch)+'.pth')
-                    f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f" % (epoch, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), optimizer.state_dict()['param_groups'][0]['lr']))
+                        torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_forget_two_kinds_20210321_'+str(epoch)+'.pth')
+                    f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f,BATCH_SIZE:%d" % (
+                    epoch, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                    optimizer.state_dict()['param_groups'][0]['lr'], BATCH_SIZE))
                     f.write('\n')
                     f.flush()
                 scheduler.step(1. * loss_val_sum / total, epoch=epoch)
             print('Saving model......')
-            torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_forget_two_kinds_finished_saving_'+str(epoch)+'.pth')
+            torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_forget_two_kinds_finished_saving_20210321_'+str(epoch)+'.pth')
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

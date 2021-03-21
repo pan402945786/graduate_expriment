@@ -11,6 +11,7 @@ from common import datasets
 from common.resnet_1 import ResNet50
 from common.resnet_1 import ResNet18
 import os
+import numpy as np
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -129,58 +130,74 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 # 使用相同测试集测试各个参数准确率
 print("Waiting Test!")
 
-targetFile = 'resnet18_cifar10_forget_two_kinds_35.pth'
+targetFile = 'resnet18_cifar10_forget_two_kinds_20210321_25.pth'
 
 savedFiles = [
     'resnet18_cifar10_normal_train_finished_saving_60.pth',
     'resnet18_cifar10_noraml_train_init.pth',
     'resnet18_cifar10_fc_before_training.pth',
-    'resnet18_cifar10_fc_before_training.pth_after_finetuning_20.pth'
+    'resnet18_cifar10_fc_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv1_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv2_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv3_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv4_before_training.pth_forget_two_kinds_after_finetuning_22.pth',
+    'resnet18_cifar10_fc_conv5_before_training.pth_forget_two_kinds_after_finetuning_22.pth',
+    'resnet18_cifar10_fc_conv6_before_training.pth_forget_two_kinds_after_finetuning_26.pth',
+    'resnet18_cifar10_fc_conv7_before_training.pth_forget_two_kinds_after_finetuning_23.pth',
+    'resnet18_cifar10_fc_conv8_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv9_before_training.pth_forget_two_kinds_after_finetuning_25.pth',
+    'resnet18_cifar10_fc_conv10_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv11_before_training.pth_forget_two_kinds_after_finetuning_26.pth',
+    'resnet18_cifar10_fc_conv12_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv13_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv14_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv15_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv16_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_fc_conv17_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
+    'resnet18_cifar10_forget_two_kinds_35.pth',
+    'resnet18_cifar10_forget_two_kinds_20210321_25_machine_1.pth',
+    'resnet18_cifar10_forget_two_kinds_init.pth',
+    'resnet18_cifar10_forget_two_kinds_20210321_5.pth',
+    'resnet18_cifar10_forget_two_kinds_20210321_10.pth',
+    'resnet18_cifar10_forget_two_kinds_20210321_15.pth',
+    'resnet18_cifar10_forget_two_kinds_20210321_20.pth',
 ]
 
 testloader_unforget = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)
 testloader_forget = torch.utils.data.DataLoader(forgottenExamples, batch_size=100, shuffle=False, num_workers=2)
+testloader_all = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
 
-totals = [0,0,0,0,0,0,0,0,0]
-corrects = [0,0,0,0,0,0,0,0,0]
+norm_1s = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+norm_2s = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+
+def cal_norm(vec_1, vec_2, ord):
+    diff = vec_1 - vec_2
+    norm_sum = 0
+    for diff_item in diff:
+        norm_sum += np.linalg.norm(diff_item, ord=ord)
+    return norm_sum
+
+
 with torch.no_grad():
-    for data in testloader_unforget:
+    total_count = 0
+    for data in testloader_all:
         net.eval()
         images, labels = data
         images, labels = images.to(device), labels.to(device)
+        checkpoint = torch.load("./model/" + targetFile)
+        net.load_state_dict(checkpoint)
+        outputs = net(images)
+        prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
+        total_count += labels.size(0)
         for i, file in enumerate(savedFiles, 0):
-            # net.load_state_dict("./model/" + file, map_location='cpu')
             checkpoint = torch.load("./model/" + file)
             net.load_state_dict(checkpoint)
             outputs = net(images)
-            # 取得分最高的那个类 (outputs.data的索引号)
-            _, predicted = torch.max(outputs.data, 1)
-            totals[i] += labels.size(0)
-            corrects[i] += (predicted == labels).sum()
+            prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
+            norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
+            norm_2s[i] = cal_norm(prbblt_pred, prbblt_target, 2)
     for i, file in enumerate(savedFiles, 0):
-        print(file + '测试分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
-
-print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-
-
-totals = [0,0,0,0,0,0,0,0,0]
-corrects = [0,0,0,0,0,0,0,0,0]
-with torch.no_grad():
-    for data in testloader_forget:
-        net.eval()
-        images, labels = data
-        images, labels = images.to(device), labels.to(device)
-        for i, file in enumerate(savedFiles, 0):
-            # net.load_state_dict("./model/" + file, map_location='cpu')
-            checkpoint = torch.load("./model/" + file)
-            net.load_state_dict(checkpoint)
-            outputs = net(images)
-            # 取得分最高的那个类 (outputs.data的索引号)
-            _, predicted = torch.max(outputs.data, 1)
-            totals[i] += labels.size(0)
-            corrects[i] += (predicted == labels).sum()
-    for i, file in enumerate(savedFiles, 0):
-        print(file + '测试分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
+        print(file + '与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))
 
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
