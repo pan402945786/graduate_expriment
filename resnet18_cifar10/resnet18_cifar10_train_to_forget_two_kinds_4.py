@@ -166,12 +166,12 @@ if __name__ == "__main__":
             if j in frozenIndex:
                 param.requires_grad = False  # 冻结网络
             j = j + 1
-        with open(savedFiles[item-1] + "_acc.txt", "a+") as f:
-            with open(savedFiles[item-1] + "_log.txt", "a+")as f2:
+        with open(savedFiles[item-1] + "_acc_second_time.txt", "a+") as f:
+            with open(savedFiles[item-1] + "_log_second_time.txt", "a+")as f2:
                 for epoch in range(pre_epoch+1, EPOCH+1):
 
-                    if optimizer.state_dict()['param_groups'][0]['lr'] < 0.006260:
-                        break
+                    # if optimizer.state_dict()['param_groups'][0]['lr'] < 0.006260:
+                    #     break
 
                     # scheduler.step()
                     print('\nEpoch: %d' % epoch)
@@ -227,15 +227,15 @@ if __name__ == "__main__":
                         100. * correct / total, optimizer.state_dict()['param_groups'][0]['lr']))
                         acc = 100. * correct / total
                         # 将每次测试结果实时写入acc.txt文件中
-                        if epoch % 5 < 1 and pre_epoch != epoch:
+                        if epoch % 10 < 1 and pre_epoch != epoch:
                             print('Saving model......')
-                            torch.save(net.state_dict(), args.outf + '/' + savedFiles[item - 1] + '_finetuning_' + str(epoch) + '.pth')
+                            torch.save(net.state_dict(), args.outf + '/' + savedFiles[item - 1] + '_finetuning_' + str(epoch) + '_second_time.pth')
                         f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f,BATCH_SIZE:%d" % (epoch, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), optimizer.state_dict()['param_groups'][0]['lr'], BATCH_SIZE))
                         f.write('\n')
                         f.flush()
                     scheduler.step(1.0 * loss_val_sum / total, epoch=epoch)
                 print('Saving model......')
                 torch.save(net.state_dict(),
-                           args.outf + '/' + savedFiles[item - 1] + '_forget_two_kinds_after_finetuning_' + str(epoch) + '.pth')
+                           args.outf + '/' + savedFiles[item - 1] + '_forget_two_kinds_after_finetuning_' + str(epoch) + '_second_time.pth')
                 print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

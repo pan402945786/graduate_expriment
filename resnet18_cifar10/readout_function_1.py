@@ -130,7 +130,7 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 # 使用相同测试集测试各个参数准确率
 print("Waiting Test!")
 
-targetFile = 'resnet18_cifar10_forget_two_kinds_20210321_25.pth'
+targetFile = 'resnet18_cifar10_forget_two_kinds_20210321_25_machine_1.pth'
 
 savedFiles = [
     'resnet18_cifar10_normal_train_finished_saving_60.pth',
@@ -155,21 +155,53 @@ savedFiles = [
     'resnet18_cifar10_fc_conv16_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
     'resnet18_cifar10_fc_conv17_before_training.pth_forget_two_kinds_after_finetuning_30.pth',
     'resnet18_cifar10_forget_two_kinds_35.pth',
-    'resnet18_cifar10_forget_two_kinds_20210321_25_machine_1.pth',
+    'resnet18_cifar10_forget_two_kinds_20210321_25.pth',
     'resnet18_cifar10_forget_two_kinds_init.pth',
     'resnet18_cifar10_forget_two_kinds_20210321_5.pth',
     'resnet18_cifar10_forget_two_kinds_20210321_10.pth',
     'resnet18_cifar10_forget_two_kinds_20210321_15.pth',
     'resnet18_cifar10_forget_two_kinds_20210321_20.pth',
+    'resnet18_cifar10_fc_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv1_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv2_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv3_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv4_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv5_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv6_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv7_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv8_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv9_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv10_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv11_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv12_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv13_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv14_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv15_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv16_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_fc_conv17_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_10_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_9_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_8_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_7_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_6_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_5_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_4_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_3_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_2_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_1_time_.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_0_time_.pth',
 ]
 
 testloader_unforget = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)
 testloader_forget = torch.utils.data.DataLoader(forgottenExamples, batch_size=100, shuffle=False, num_workers=2)
 testloader_all = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
 
-norm_1s = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-norm_2s = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+norm_1s = []
+norm_2s = []
 
+for i in range(len(savedFiles)):
+    norm_1s.append(0)
+    norm_2s.append(0)
 
 def cal_norm(vec_1, vec_2, ord):
     diff = vec_1 - vec_2
@@ -181,22 +213,24 @@ def cal_norm(vec_1, vec_2, ord):
 
 with torch.no_grad():
     total_count = 0
-    for data in testloader_all:
+    # for data in testloader_all:
+    for data in testloader_forget:
+    # for data in testloader_unforget:
         net.eval()
         images, labels = data
         images, labels = images.to(device), labels.to(device)
+        total_count += labels.size(0)
         checkpoint = torch.load("./model/" + targetFile)
         net.load_state_dict(checkpoint)
         outputs = net(images)
         prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
-        total_count += labels.size(0)
         for i, file in enumerate(savedFiles, 0):
             checkpoint = torch.load("./model/" + file)
             net.load_state_dict(checkpoint)
             outputs = net(images)
             prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
             norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
-            norm_2s[i] = cal_norm(prbblt_pred, prbblt_target, 2)
+            norm_2s[i] += cal_norm(prbblt_pred, prbblt_target, 2)
     for i, file in enumerate(savedFiles, 0):
         print(file + '与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))
 
