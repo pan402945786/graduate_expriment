@@ -145,8 +145,8 @@ transform_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
-trainset = torchvision.datasets.CIFAR10(root='D:\www\graduate_expriment\data', train=True, download=False, transform=transform_train) #训练数据集
-testset = torchvision.datasets.CIFAR10(root='D:\www\graduate_expriment\data', train=False, download=False, transform=transform_test)
+trainset = torchvision.datasets.CIFAR10(root='../data', train=True, download=False, transform=transform_train) #训练数据集
+testset = torchvision.datasets.CIFAR10(root='../data', train=False, download=False, transform=transform_test)
 print(len(trainset))
 print(len(testset))
 
@@ -157,14 +157,14 @@ unforgottenExamples_train = []
 forgottenExamples_test = []
 unforgottenExamples_test = []
 for i, item in enumerate(trainset):
-    # if i > 10:
+    # if i > 1000:
     #     break
     if item[1] in forgetClasses:
         forgottenExamples_train.append(item)
     else:
         unforgottenExamples_train.append(item)
 for i, item in enumerate(testset):
-    # if i > 10:
+    # if i > 1000:
     #     break
     if item[1] in forgetClasses:
         forgottenExamples_test.append(item)
@@ -173,7 +173,7 @@ for i, item in enumerate(testset):
 
 temp_test = []
 for i, item in enumerate(testset):
-    if i > 10:
+    if i > 1000:
         break
     temp_test.append(item)
 
@@ -194,7 +194,8 @@ test_loader_full = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, n
 # test_loader_full = torch.utils.data.DataLoader(temp_test, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True, shuffle=False)
 
 # create models
-root_dir = r'D:\www\graduate_expriment\resnet18_cifar10\model\\'
+root_dir = r'/home/ubuntu/ml/resnet18_cifar10/model/'
+# root_dir = r'/media/public/ml/resnet18_cifar10/model/'
 model_scrubf = ResNet18().to(device)
 checkpoint = torch.load(root_dir + "resnet18_cifar10_normal_train_finished_saving_60.pth")
 model_scrubf.load_state_dict(checkpoint)
@@ -206,7 +207,6 @@ modelf.load_state_dict(checkpoint)
 modelf0 = ResNet18().to(device)
 checkpoint = torch.load(root_dir + "resnet18_cifar10_forget_two_kinds_finished_saving_30_29_time_.pth")
 modelf0.load_state_dict(checkpoint)
-
 
 for p in itertools.chain(modelf.parameters(), modelf0.parameters(), model_scrubf.parameters()):
     p.data0 = copy.deepcopy(p.data.clone())
@@ -301,9 +301,9 @@ for i, p in enumerate(modelf.parameters()):
     p.data = mu + var.sqrt() * torch.empty_like(p.data0).normal_()
     fisher_dir.append(var.sqrt().view(-1).cpu().detach().numpy())
 
-for i, p in enumerate(modelf0.parameters()):
-    mu, var = get_mean_var(p, False, alpha=alpha)
-    p.data = mu + var.sqrt() * torch.empty_like(p.data0).normal_()
+# for i, p in enumerate(modelf0.parameters()):
+#     mu, var = get_mean_var(p, False, alpha=alpha)
+#     p.data = mu + var.sqrt() * torch.empty_like(p.data0).normal_()
 # %%
 print(test(modelf, retain_loader))
 print(test(modelf, forget_loader))
@@ -312,65 +312,65 @@ print('Saving model......')
 torch.save(modelf.state_dict(), root_dir+'resnet18_cifar10_fisher_forget_model_1.pth')
 print('saved!')
 
-# def get_metrics(model,dataloader,criterion,samples_correctness=False,use_bn=False,delta_w=None,scrub_act=False):
-#     activations=[]
-#     predictions=[]
-#     if use_bn:
-#         model.train()
-#         dataloader = torch.utils.data.DataLoader(retain_loader.dataset, batch_size=128, shuffle=True)
-#         for i in range(10):
-#             for batch_idx, (data, target) in enumerate(dataloader):
-#                 data, target = data.to(device), target.to(device)
-#                 output = model(data)
-#     dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=1, shuffle=False)
-#     model.eval()
-#     metrics = AverageMeter()
-#     mult = 0.5 if lossfn=='mse' else 1
-#     for batch_idx, (data, target) in enumerate(dataloader):
-#         data, target = data.to(device), target.to(device)
-#         if lossfn=='mse':
-#             target=(2*target-1)
-#             target = target.type(torch.cuda.FloatTensor).unsqueeze(1)
-#         if 'mnist' in dataset:
-#             data=data.view(data.shape[0],-1)
-#         output = model(data)
-#         loss = mult*criterion(output, target)
-#         if samples_correctness:
-#             activations.append(torch.nn.functional.softmax(output,dim=1).cpu().detach().numpy().squeeze())
-#             predictions.append(get_error(output,target))
-#         metrics.update(n=data.size(0), loss=loss.item(), error=get_error(output, target))
-#     if samples_correctness:
-#         return metrics.avg,np.stack(activations),np.array(predictions)
-#     else:
-#         return metrics.avg
-#
-#
-# def activations_predictions(model,dataloader,name):
-#     criterion = torch.nn.CrossEntropyLoss()
-#     metrics,activations,predictions=get_metrics(model,dataloader,criterion,True)
-#     print(f"{name} -> Loss:{np.round(metrics['loss'],3)}, Error:{metrics['error']}")
-#     return activations,predictions
-#
-#
-# def predictions_distance(l1,l2,name):
-#     dist = np.sum(np.abs(l1-l2))
-#     print(f"Predictions Distance {name} -> {dist}")
-#
-#
-# def activations_distance(a1,a2,name):
-#     dist = np.linalg.norm(a1-a2,ord=1,axis=1).mean()
-#     print(f"Activations Distance {name} -> {dist}")
-#
-#
-# m0_D_r_activations, m0_D_r_predictions = activations_predictions(modelf0, retain_loader, 'Retrain_Model_D_r')
-# m0_D_f_activations, m0_D_f_predictions = activations_predictions(modelf0, forget_loader, 'Retrain_Model_D_f')
-# m0_D_t_activations, m0_D_t_predictions = activations_predictions(modelf0, test_loader_full, 'Retrain_Model_D_t')
-# # %%
-# fisher_D_r_activations, fisher_D_r_predictions = activations_predictions(modelf, retain_loader, 'Fisher_D_r')
-# fisher_D_f_activations, fisher_D_f_predictions = activations_predictions(modelf, forget_loader, 'Fisher_D_f')
-# fisher_D_t_activations, fisher_D_t_predictions = activations_predictions(modelf, test_loader_full, 'Fisher_D_t')
-# # %%
-# predictions_distance(m0_D_f_predictions, fisher_D_f_predictions, 'Retrain_Fisher_D_f')
-# activations_distance(m0_D_f_activations, fisher_D_f_activations, 'Retrain_Fisher_D_f')
-# activations_distance(m0_D_r_activations, fisher_D_r_activations, 'Retrain_Fisher_D_r')
-# activations_distance(m0_D_t_activations, fisher_D_t_activations, 'Retrain_Fisher_D_t')
+def get_metrics(model,dataloader,criterion,samples_correctness=False,use_bn=False,delta_w=None,scrub_act=False):
+    activations=[]
+    predictions=[]
+    if use_bn:
+        model.train()
+        dataloader = torch.utils.data.DataLoader(retain_loader.dataset, batch_size=128, shuffle=True)
+        for i in range(10):
+            for batch_idx, (data, target) in enumerate(dataloader):
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+    dataloader = torch.utils.data.DataLoader(dataloader.dataset, batch_size=1, shuffle=False)
+    model.eval()
+    metrics = AverageMeter()
+    mult = 0.5 if lossfn=='mse' else 1
+    for batch_idx, (data, target) in enumerate(dataloader):
+        data, target = data.to(device), target.to(device)
+        if lossfn=='mse':
+            target=(2*target-1)
+            target = target.type(torch.cuda.FloatTensor).unsqueeze(1)
+        if 'mnist' in dataset:
+            data=data.view(data.shape[0],-1)
+        output = model(data)
+        loss = mult*criterion(output, target)
+        if samples_correctness:
+            activations.append(torch.nn.functional.softmax(output,dim=1).cpu().detach().numpy().squeeze())
+            predictions.append(get_error(output,target))
+        metrics.update(n=data.size(0), loss=loss.item(), error=get_error(output, target))
+    if samples_correctness:
+        return metrics.avg,np.stack(activations),np.array(predictions)
+    else:
+        return metrics.avg
+
+
+def activations_predictions(model,dataloader,name):
+    criterion = torch.nn.CrossEntropyLoss()
+    metrics,activations,predictions=get_metrics(model,dataloader,criterion,True)
+    print(f"{name} -> Loss:{np.round(metrics['loss'],3)}, Error:{metrics['error']}")
+    return activations,predictions
+
+
+def predictions_distance(l1,l2,name):
+    dist = np.sum(np.abs(l1-l2))
+    print(f"Predictions Distance {name} -> {dist}")
+
+
+def activations_distance(a1,a2,name):
+    dist = np.linalg.norm(a1-a2,ord=1,axis=1).mean()
+    print(f"Activations Distance {name} -> {dist}")
+
+
+m0_D_r_activations, m0_D_r_predictions = activations_predictions(modelf0, retain_loader, 'Retrain_Model_D_r')
+m0_D_f_activations, m0_D_f_predictions = activations_predictions(modelf0, forget_loader, 'Retrain_Model_D_f')
+m0_D_t_activations, m0_D_t_predictions = activations_predictions(modelf0, test_loader_full, 'Retrain_Model_D_t')
+# %%
+fisher_D_r_activations, fisher_D_r_predictions = activations_predictions(modelf, retain_loader, 'Fisher_D_r')
+fisher_D_f_activations, fisher_D_f_predictions = activations_predictions(modelf, forget_loader, 'Fisher_D_f')
+fisher_D_t_activations, fisher_D_t_predictions = activations_predictions(modelf, test_loader_full, 'Fisher_D_t')
+# %%
+predictions_distance(m0_D_f_predictions, fisher_D_f_predictions, 'Retrain_Fisher_D_f')
+activations_distance(m0_D_f_activations, fisher_D_f_activations, 'Retrain_Fisher_D_f')
+activations_distance(m0_D_r_activations, fisher_D_r_activations, 'Retrain_Fisher_D_r')
+activations_distance(m0_D_t_activations, fisher_D_t_activations, 'Retrain_Fisher_D_t')
