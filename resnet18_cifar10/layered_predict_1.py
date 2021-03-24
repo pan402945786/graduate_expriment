@@ -135,7 +135,9 @@ savedFiles = [
     'resnet18_cifar10_normal_train_finished_saving_60.pth',
     'resnet18_cifar10_noraml_train_init.pth',
     'resnet18_cifar10_fc_before_training.pth',
-    'resnet18_cifar10_fc_before_training.pth_after_finetuning_20.pth'
+    'resnet18_cifar10_fc_before_training.pth_after_finetuning_20.pth',
+    'resnet18_cifar10_fisher_forget_model_1.pth',
+    'resnet18_cifar10_forget_two_kinds_finished_saving_30_2_time_.pth',
 ]
 
 testloader_unforget = torch.utils.data.DataLoader(unforgottenExamples, batch_size=100, shuffle=False, num_workers=2)

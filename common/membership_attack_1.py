@@ -2,6 +2,7 @@ from sklearn.svm import SVC
 import torch
 # import tqdm
 from tqdm.autonotebook import tqdm
+from sklearn.linear_model import LogisticRegression
 
 import numpy as np
 import torch.nn.functional as F
@@ -81,19 +82,93 @@ test_loader_full = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, n
 # test_loader_full = torch.utils.data.DataLoader(temp_test, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True, shuffle=False)
 
 # create models
-root_dir = r'/media/public/ml/resnet18_cifar10/model/'
+# root_dir = r'/media/public/ml/resnet18_cifar10/model/'
+root_dir = r'/home/ubuntu/ml/resnet18_cifar10/model/'
 # root_dir = r'D:\www\graduate_expriment\resnet18_cifar10\model\\'
 model = ResNet18().to(device)
 checkpoint = torch.load(root_dir + "resnet18_cifar10_normal_train_finished_saving_60.pth")
 model.load_state_dict(checkpoint)
 
 modelf = ResNet18().to(device)
-# checkpoint = torch.load(root_dir + "resnet18_cifar10_normal_train_finished_saving_60.pth")
-# modelf.load_state_dict(checkpoint)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fisher_forget_model_1.pth")
+modelf.load_state_dict(checkpoint)
 
 model0 = ResNet18().to(device)
 checkpoint = torch.load(root_dir + "resnet18_cifar10_forget_two_kinds_finished_saving_30_29_time_.pth")
 model0.load_state_dict(checkpoint)
+
+model01_fc = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc.load_state_dict(checkpoint)
+
+model01_fc_conv1 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv1_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv1.load_state_dict(checkpoint)
+
+model01_fc_conv2 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv2_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv2.load_state_dict(checkpoint)
+
+model01_fc_conv3 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv3_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv3.load_state_dict(checkpoint)
+
+model01_fc_conv4 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv4_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv4.load_state_dict(checkpoint)
+
+model01_fc_conv5 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv5_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv5.load_state_dict(checkpoint)
+
+model01_fc_conv6 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv6_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv6.load_state_dict(checkpoint)
+
+model01_fc_conv7 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv7_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv7.load_state_dict(checkpoint)
+
+model01_fc_conv8 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv8_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv8.load_state_dict(checkpoint)
+
+model01_fc_conv9 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv9_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv9.load_state_dict(checkpoint)
+
+model01_fc_conv10 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv10_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv10.load_state_dict(checkpoint)
+
+model01_fc_conv11 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv11_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv11.load_state_dict(checkpoint)
+
+model01_fc_conv12 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv12_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv12.load_state_dict(checkpoint)
+
+model01_fc_conv13 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv13_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv13.load_state_dict(checkpoint)
+
+model01_fc_conv14 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv14_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv14.load_state_dict(checkpoint)
+
+model01_fc_conv15 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv15_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv15.load_state_dict(checkpoint)
+
+model01_fc_conv16 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv16_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv16.load_state_dict(checkpoint)
+
+model01_fc_conv17 = ResNet18().to(device)
+checkpoint = torch.load(root_dir + "resnet18_cifar10_fc_conv17_before_training.pth_forget_two_kinds_after_finetuning_30_second_time.pth")
+model01_fc_conv17.load_state_dict(checkpoint)
+
 
 def entropy(p, dim=-1, keepdim=False):
     return -torch.where(p > 0, p * p.log(), p.new([0.0])).sum(dim=dim, keepdim=keepdim)
@@ -126,8 +201,8 @@ def get_membership_attack_data(retain_loader, forget_loader, test_loader, model)
 
 def get_membership_attack_prob(retain_loader, forget_loader, test_loader, model):
     X_f, Y_f, X_r, Y_r = get_membership_attack_data(retain_loader, forget_loader, test_loader, model)
-    clf = SVC(C=3, gamma='auto', kernel='rbf')
-    # clf = LogisticRegression(class_weight='balanced',solver='lbfgs',multi_class='multinomial')
+    # clf = SVC(C=3, gamma='auto', kernel='rbf')
+    clf = LogisticRegression(class_weight='balanced',solver='lbfgs',multi_class='multinomial')
     clf.fit(X_r, Y_r)
     results = clf.predict(X_f)
     return results.mean()
@@ -160,8 +235,49 @@ def membership_attack(retain_loader, forget_loader, test_loader, model):
 # %%
 attack_dict = {}
 # %%
-attack_dict['Original'] = membership_attack(retain_loader, forget_loader, test_loader_full, model)
+# print('original')
+# attack_dict['Original'] = membership_attack(retain_loader, forget_loader, test_loader_full, model)
+# # %%
+# print('Retrain')
+# attack_dict['Retrain'] = membership_attack(retain_loader, forget_loader, test_loader_full, model0)
 # %%
-attack_dict['Retrain'] = membership_attack(retain_loader, forget_loader, test_loader_full, model0)
-# %%
-attack_dict['Fisher'] = membership_attack(retain_loader, forget_loader, test_loader_full, modelf)
+# print('Fisher')
+# attack_dict['Fisher'] = membership_attack(retain_loader, forget_loader, test_loader_full, modelf)
+# print('ft_fc')
+# attack_dict['ft_fc'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc)
+# print('ft_fc_conv1')
+# attack_dict['ft_fc_1'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv1)
+# print('ft_fc_conv2')
+# attack_dict['ft_fc_2'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv2)
+# print('ft_fc_conv3')
+# attack_dict['ft_fc_3'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv3)
+# print('ft_fc_conv4')
+# attack_dict['ft_fc_4'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv4)
+# print('ft_fc_conv5')
+# attack_dict['ft_fc_5'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv5)
+# print('ft_fc_conv6')
+# attack_dict['ft_fc_6'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv6)
+# print('ft_fc_conv7')
+# attack_dict['ft_fc_7'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv7)
+# print('ft_fc_conv8')
+# attack_dict['ft_fc_8'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv8)
+# print('ft_fc_conv9')
+# attack_dict['ft_fc_9'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv9)
+# print('ft_fc_conv10')
+# attack_dict['ft_fc_10'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv10)
+print('ft_fc_conv11')
+attack_dict['ft_fc_11'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv11)
+print('ft_fc_conv12')
+attack_dict['ft_fc_12'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv12)
+print('ft_fc_conv13')
+attack_dict['ft_fc_13'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv13)
+print('ft_fc_conv14')
+attack_dict['ft_fc_14'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv14)
+print('ft_fc_conv15')
+attack_dict['ft_fc_15'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv15)
+print('ft_fc_conv16')
+attack_dict['ft_fc_16'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv16)
+print('ft_fc_conv17')
+attack_dict['ft_fc_17'] = membership_attack(retain_loader, forget_loader, test_loader_full, model01_fc_conv17)
+
+
