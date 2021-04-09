@@ -142,6 +142,7 @@ print("Waiting Test!")
 targetFile = 'resnet18_cifar10_forget_two_kinds_finished_saving_30_10_time_.pth'
 
 savedFiles = [
+    'resnet18_cifar10_fc_before_training.pth_forget_two_kinds_after_finetuning_30_no_freezing_second.pth',
     'resnet18_cifar10_fc_conv1_before_training.pth_forget_two_kinds_after_finetuning_30_no_freezing_second.pth',
     'resnet18_cifar10_fc_conv2_before_training.pth_forget_two_kinds_after_finetuning_30_no_freezing_second.pth',
     'resnet18_cifar10_fc_conv3_before_training.pth_forget_two_kinds_after_finetuning_30_no_freezing_second.pth',
