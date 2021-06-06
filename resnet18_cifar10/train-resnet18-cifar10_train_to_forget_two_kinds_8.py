@@ -24,6 +24,9 @@ parser.add_argument('--batch_size', type=int, default=100, help='batch size')
 
 args = parser.parse_args()
 print(args)
+
+layer_count_list = [6]
+
 # os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
@@ -47,8 +50,38 @@ net = ResNet18().to(device)
 # net = net.cuda()
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
-print('Saving model......')
-torch.save(net.state_dict(), '%s/resnet18_cifar10_forget_two_kinds_20210515_init.pth' % (args.outf))
+checkpoint = torch.load(args.outf + "resnet18_cifar10_fc_conv5_before_training.pth", map_location='cpu')
+net.load_state_dict(checkpoint)
+print('loaded file: resnet18_cifar10_fc_conv5_before_training.pth')
+
+layeredParams = []
+
+layeredParams.append(["conv1.0.weight", "conv1.1.weight", "conv1.1.bias"])
+layeredParams.append(["layer1.0.left.0.weight", "layer1.0.left.1.weight", "layer1.0.left.1.bias", ])
+layeredParams.append(["layer1.0.left.3.weight", "layer1.0.left.4.weight", "layer1.0.left.4.bias", ])
+layeredParams.append(["layer1.1.left.0.weight", "layer1.1.left.1.weight", "layer1.1.left.1.bias", ])
+layeredParams.append(["layer1.1.left.3.weight", "layer1.1.left.4.weight", "layer1.1.left.4.bias", ])
+
+layeredParams.append(["layer2.0.left.0.weight", "layer2.0.left.1.weight", "layer2.0.left.1.bias", ])
+layeredParams.append(["layer2.0.left.3.weight", "layer2.0.left.4.weight", "layer2.0.left.4.bias", "layer2.0.shortcut.0.weight", "layer2.0.shortcut.1.weight", "layer2.0.shortcut.1.bias", ])
+layeredParams.append(["layer2.1.left.0.weight", "layer2.1.left.1.weight", "layer2.1.left.1.bias", ])
+layeredParams.append(["layer2.1.left.3.weight", "layer2.1.left.4.weight", "layer2.1.left.4.bias",])
+
+layeredParams.append(["layer3.0.left.0.weight", "layer3.0.left.1.weight", "layer3.0.left.1.bias",])
+layeredParams.append(["layer3.0.left.3.weight", "layer3.0.left.4.weight", "layer3.0.left.4.bias", "layer3.0.shortcut.0.weight", "layer3.0.shortcut.1.weight", "layer3.0.shortcut.1.bias",])
+layeredParams.append([ "layer3.1.left.0.weight", "layer3.1.left.1.weight", "layer3.1.left.1.bias",])
+layeredParams.append(["layer3.1.left.3.weight", "layer3.1.left.4.weight", "layer3.1.left.4.bias"])
+
+layeredParams.append(["layer4.0.left.0.weight", "layer4.0.left.1.weight", "layer4.0.left.1.bias",])
+layeredParams.append(["layer4.0.left.3.weight", "layer4.0.left.4.weight", "layer4.0.left.4.bias", "layer4.0.shortcut.0.weight", "layer4.0.shortcut.1.weight", "layer4.0.shortcut.1.bias",])
+layeredParams.append(["layer4.1.left.0.weight", "layer4.1.left.1.weight", "layer4.1.left.1.bias",])
+layeredParams.append(["layer4.1.left.3.weight", "layer4.1.left.4.weight", "layer4.1.left.4.bias",])
+
+layeredParams.append(["fc.weight", "fc.bias",])
+
+frozenLayer = []
+for j in range(18-6):
+    frozenLayer = frozenLayer + layeredParams[j]
 
 # 训练
 if __name__ == "__main__":
@@ -101,8 +134,21 @@ if __name__ == "__main__":
                                   threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0,
                                   eps=1e-08)
 
-    with open("resnet18_cifar10_forget_two_kinds_20210515_acc.txt", "a+") as f:
-        with open("resnet18_cifar10_forget_two_kinds_20210515_log.txt", "a+")as f2:
+    # 冻结相关层
+    frozenIndex = []
+    paramCount = 0
+    for name, param in net.named_parameters():
+        if name in frozenLayer:
+            frozenIndex.append(paramCount)
+        paramCount = paramCount + 1
+    j = 0
+    for param in net.parameters():
+        param.requires_grad = True
+        if j in frozenIndex:
+            param.requires_grad = False  # 冻结网络
+        j = j + 1
+    with open("resnet18_cifar10_train_to_forget_two_kinds_20210515_acc.txt", "a+") as f:
+        with open("resnet18_cifar10_train_to_forget_two_kinds_20210515_log.txt", "a+")as f2:
             for epoch in range(pre_epoch+1, EPOCH+1):
                 # scheduler.step()
                 print('\nEpoch: %d' % epoch)
@@ -165,7 +211,7 @@ if __name__ == "__main__":
                     # 将每次测试结果实时写入acc.txt文件中
                     if epoch % 5 < 1 and pre_epoch != epoch:
                         print('Saving model......')
-                        torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_forget_two_kinds_20210515_'+str(epoch)+'.pth')
+                        torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_train_to_forget_two_kinds_20210515_'+str(epoch)+'.pth')
                     f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f,BATCH_SIZE:%d" % (
                     epoch, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
                     optimizer.state_dict()['param_groups'][0]['lr'], BATCH_SIZE))
@@ -173,6 +219,6 @@ if __name__ == "__main__":
                     f.flush()
                 scheduler.step(1. * loss_val_sum / total, epoch=epoch)
             print('Saving model......')
-            torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_forget_two_kinds_finished_saving_20210515_'+str(epoch)+'.pth')
+            torch.save(net.state_dict(), args.outf + '/resnet18_cifar10_train_to_forget_two_kinds_finished_saving_20210515_'+str(epoch)+'.pth')
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 
