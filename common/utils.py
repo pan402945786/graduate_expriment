@@ -2,6 +2,8 @@ import pandas as pd
 import csv
 import os
 import sys
+sys.path.append("..")
+from common.resnet_100kinds_vggface2 import ResNet18
 import torch
 import shutil
 import pickle
@@ -90,3 +92,37 @@ def accuracy(output, target, topk=(1,)):
 def create_dir(dir_name):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name)
+
+
+def generateParamsResnet18(former, later, layeredParams, isReverse, filePath):
+    # 定义是否使用GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 模型定义-ResNet
+    net = ResNet18().to(device)
+    toLoad = {}
+    checkpoint = torch.load(filePath+former, map_location='cpu')
+    net.load_state_dict(checkpoint)
+    params = net.state_dict()
+    toLoad = params
+    checkpoint = torch.load(filePath+later, map_location='cpu')
+    strucName = 'resnet18_'
+    datasetName = 'vggface100_'
+    fileNameList = []
+    for i, params in enumerate(layeredParams):
+        newLayerParams = []
+        for j in range(i+1):
+            newLayerParams = newLayerParams + layeredParams[j]
+        if isReverse:
+            resetLayerName = "reverse_reset_" + str(i+1) + "_"
+        else:
+            resetLayerName = "reset_" + str(i+1) + "_"
+        fileName = strucName+datasetName+resetLayerName+"before_training.pth"
+        for k in checkpoint.keys():
+            if k in newLayerParams:
+                toLoad[k] = checkpoint[k]
+                print("added:" + k)
+        net.load_state_dict(toLoad)
+        print('Saving model:'+fileName)
+        torch.save(net.state_dict(), '%s/%s' % (filePath, fileName))
+        fileNameList.append(fileName)
+    return fileNameList
