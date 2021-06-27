@@ -25,8 +25,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # testRetainFile = r"/test-80kinds-all.txt"
 
 #2080
-trainFile = r"/train_list_100.txt"
-testFile = r"/test_list_100.txt"
+trainFile = r"/train-80kinds-all.txt"
+testFile = r"/test-80kinds-all.txt"
 fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
 dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
 datasetRoot = r'/datasets/train'
@@ -60,7 +60,7 @@ cuda = torch.cuda.is_available()
 if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 # 超参数设置
-EPOCH = 40   #遍历数据集次数
+EPOCH = 80   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
 
@@ -96,14 +96,14 @@ optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) 
 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, verbose=True,
                                                        threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0,
                                                        eps=1e-08)
-print('Saving model......')
-torch.save(net.state_dict(), '%s/resnet18_vgg100_normal_init.pth' % (args.outf))
+# print('Saving model......')
+# torch.save(net.state_dict(), '%s/resnet18_vgg100_normal_init.pth' % (args.outf))
 
 # 训练
 if __name__ == "__main__":
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
-    with open("resnet18_vgg100_normal_train_allcounts_acc.txt", "a+") as f:
-        with open("resnet18_vgg100_normal_train_allcounts_log.txt", "a+")as f2:
+    with open("resnet18_vgg80_retrain_allcounts_acc.txt", "a+") as f:
+        with open("resnet18_vgg80_retrain_allcounts_log.txt", "a+")as f2:
             for epoch in range(pre_epoch, EPOCH):
                 # scheduler.step()
                 print('\nEpoch: %d' % (epoch + 1))
@@ -167,21 +167,20 @@ if __name__ == "__main__":
                     # 将每次测试结果实时写入acc.txt文件中
                     if (epoch+1) % 10 < 1:
                         print('Saving model......')
-                        torch.save(net.state_dict(), '%s/resnet18_vggface100_normal_%03d_epoch.pth' % (args.outf, epoch + 1))
+                        torch.save(net.state_dict(), '%s/resnet18_vggface80_retrain_%03d_epoch.pth' % (args.outf, epoch + 1))
                     f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f,BATCH_SIZE:%d,lastTestLoss:%.3f" % (
                     epoch+1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
                     optimizer.state_dict()['param_groups'][0]['lr'], BATCH_SIZE, lastLoss))
-
                     f.write('\n')
                     f.flush()
                 scheduler.step(lastLoss, epoch=epoch)
-                if lastTrainLoss < T_threshold:
-                    print('train loss达到限值%s，提前退出' % lastTrainLoss)
+                if lastLoss < T_threshold:
+                    print('loss达到限值%s，提前退出' % lastLoss)
                     print('Saving model......')
                     torch.save(net.state_dict(),
-                               '%s/resnet18_vggface100_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
+                               '%s/resnet18_vggface80_retrain_%03d_epoch.pth' % (args.outf, epoch + 1))
                     break
             print('Saving model......')
-            torch.save(net.state_dict(), '%s/resnet18_vggface100_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
+            torch.save(net.state_dict(), '%s/resnet18_vggface80_retrain_%03d_epoch.pth' % (args.outf, epoch + 1))
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

@@ -23,20 +23,18 @@ trainForgetFile = r"/train-20kinds-all.txt"
 trainRetainFile = r"/train-80kinds-all.txt"
 testForgetFile = r"/test-20kinds-all.txt"
 testRetainFile = r"/test-80kinds-all.txt"
-
-# 2080机器
 trainFile = r"/train-100kinds-200counts.txt"
 testFile = r"/test-100kinds-all.txt"
-fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
-dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
-datasetRoot = r'/datasets/train'
+
+# 2080机器
+# fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
+# dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
+# datasetRoot = r'/datasets/train'
 
 # 1080机器
-# trainFile = r"/train-100kinds-100counts.txt"
-# testFile = r"/test-100kinds-100counts.txt"
-# fileRoot = r'/media/public/ml/resnet18-vggface100-2'
-# dataRoot = r'/media/public/ml/resnet18_vggface2'
-# datasetRoot = r'/datasets/data/root'
+fileRoot = r'/media/public/ml/resnet18-vggface100-2'
+dataRoot = r'/media/public/ml/resnet18_vggface2'
+datasetRoot = r'/datasets/data/root'
 
 layeredParams = []
 
@@ -98,7 +96,7 @@ if cuda:
 EPOCH = 70   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-BATCH_SIZE = 30      #批处理尺寸(batch_size)
+BATCH_SIZE = 20      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
 T_threshold = 0.0111
 LR_threshold = 0.003124
@@ -132,6 +130,10 @@ finishedModel = "resnet18_vggface100_normal_train_080_epoch.pth"
 paramList, freezeParamList = generateParamsResnet18(finishedModel, initModel, layeredParams, False, filePath)
 for paramIndex, param in enumerate(paramList):
     print(param)
+
+    if paramIndex != 12:
+        continue
+
     optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9,
                           weight_decay=5e-4)  # 优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, verbose=True,

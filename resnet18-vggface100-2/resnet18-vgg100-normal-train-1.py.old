@@ -16,34 +16,28 @@ import os
 import time
 
 
+
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# trainForgetFile = r"/train-20kinds-200counts.txt"
-# trainRetainFile = r"/train-80kinds-200counts.txt"
-# testForgetFile = r"/test-20kinds-all.txt"
-# testRetainFile = r"/test-80kinds-all.txt"
-
-#2080
-trainFile = r"/train_list_100.txt"
-testFile = r"/test_list_100.txt"
-fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
-dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
-datasetRoot = r'/datasets/train'
-BATCH_SIZE = 32      #批处理尺寸(batch_size)
-
-#1080
+trainForgetFile = r"/train-20kinds-100counts.txt"
+trainRetainFile = r"/train-80kinds-100counts.txt"
+testForgetFile = r"/test-20kinds-all.txt"
+testRetainFile = r"/test-80kinds-all.txt"
 # trainFile = r"/train-100kinds-200counts.txt"
-# testFile = r"/test_list_100_count_all.txt"
-# fileRoot = r'/media/public/ml/resnet18-vggface100-2'
-# dataRoot = r'/media/public/ml/resnet18_vggface2'
-# datasetRoot = r'/datasets/data/root'
-# BATCH_SIZE = 20      #批处理尺寸(batch_size)
+# testFile = r"/test-100kinds-all.txt"
+# fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
+# dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
+
+trainFile = r"/train-100kinds-100counts.txt"
+testFile = r"/test-100kinds-100counts.txt"
+fileRoot = r'/media/public/ml/resnet18-vggface100-2'
+dataRoot = r'/media/public/ml/resnet18_vggface2'
 
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--outf', default='./model/', help='folder to output images and model checkpoints') #输出结果保存路径
-parser.add_argument('--dataset_dir', type=str, default=dataRoot+datasetRoot, help='dataset directory')
+parser.add_argument('--dataset_dir', type=str, default=dataRoot+r'/datasets/train', help='dataset directory')
 parser.add_argument('--train_img_list_file', type=str, default=fileRoot+trainFile,
                     help='text file containing image files used for training')
 parser.add_argument('--test_img_list_file', type=str, default=fileRoot+testFile,
@@ -54,18 +48,17 @@ parser.add_argument('--gpu', type=int, default=0)
 
 args = parser.parse_args()
 # print(args)
-os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu) # 这么定义不管用，必须要显示定义 CUDA_VISIBLE_DEVICES=0 python xxx.py
+os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 cuda = torch.cuda.is_available()
 if cuda:
     print("torch.backends.cudnn.version: {}".format(torch.backends.cudnn.version()))
 # 超参数设置
-EPOCH = 40   #遍历数据集次数
+EPOCH = 60   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-
+BATCH_SIZE = 30      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
-T_threshold = 0.01
 
 # 0. id label map
 meta_file = args.meta_file
@@ -82,18 +75,17 @@ print(len(trainset))
 
 testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
 testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
-print(len(testset))
+
 # Cifar-10的标签
 classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # 模型定义-ResNet
-# net = ResNet18().to(device)
-net = ResNet18()
+net = ResNet18().to(device)
 
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
 optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9, weight_decay=5e-4) #优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
-scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, verbose=True,
+scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=3, verbose=True,
                                                        threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0,
                                                        eps=1e-08)
 print('Saving model......')
@@ -101,9 +93,10 @@ torch.save(net.state_dict(), '%s/resnet18_vgg100_normal_init.pth' % (args.outf))
 
 # 训练
 if __name__ == "__main__":
+    best_acc = 85  #2 初始化best test accuracy
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
-    with open("resnet18_vgg100_normal_train_allcounts_acc.txt", "a+") as f:
-        with open("resnet18_vgg100_normal_train_allcounts_log.txt", "a+")as f2:
+    with open("resnet18_vgg100_normal_train_acc.txt", "a+") as f:
+        with open("resnet18_vgg100_normal_train_log.txt", "a+")as f2:
             for epoch in range(pre_epoch, EPOCH):
                 # scheduler.step()
                 print('\nEpoch: %d' % (epoch + 1))
@@ -116,7 +109,7 @@ if __name__ == "__main__":
                     # 准备数据
                     length = len(trainloader)
                     inputs, labels = data
-                    # inputs, labels = inputs.to(device), labels.to(device)
+                    inputs, labels = inputs.to(device), labels.to(device)
                     inputs = inputs.cuda()
                     labels = labels.cuda()
                     optimizer.zero_grad()
@@ -133,7 +126,7 @@ if __name__ == "__main__":
                     _, predicted = torch.max(outputs.data, 1)
                     total += labels.size(0)
                     correct += predicted.eq(labels.data).cpu().sum()
-                    lastTrainLoss = sum_loss / (i + 1)
+                    lastLoss = sum_loss / (i + 1)
                     print('[epoch:%d, iter:%d] Loss: %.03f | Acc: %.3f%% | Time: %s | File: %s | LR: %.6f'
                           % (epoch+1, (i + 1 + epoch * length), sum_loss / (i + 1), 100. * correct / total,
                              time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), "null",
@@ -149,39 +142,36 @@ if __name__ == "__main__":
                 with torch.no_grad():
                     correct = 0
                     total = 0
-                    sum_loss = 0
-                    for i, data in enumerate(testloader):
+                    for data in testloader:
                         net.eval()
                         images, labels = data
                         images, labels = images.to(device), labels.to(device)
                         outputs = net(images)
-                        loss = criterion(outputs, labels)
-                        sum_loss += loss.item()
+                        loss_val = criterion(outputs, labels)
                         # 取得分最高的那个类 (outputs.data的索引号)
                         _, predicted = torch.max(outputs.data, 1)
                         total += labels.size(0)
                         correct += (predicted == labels).sum()
-                        lastLoss = sum_loss / (i + 1)
-                    print('测试分类准确率为：%.3f%%, 当前学习率： %.3f, last test loss: %.3f' % (100. * correct / total, optimizer.state_dict()['param_groups'][0]['lr'], lastLoss))
+                    print('测试分类准确率为：%.3f%%, 当前学习率： %.3f, last loss: %.3f' % (100. * correct / total, optimizer.state_dict()['param_groups'][0]['lr'], lastLoss))
                     acc = 100. * correct / total
                     # 将每次测试结果实时写入acc.txt文件中
-                    if (epoch+1) % 10 < 1:
+                    if epoch % 10 < 1:
                         print('Saving model......')
                         torch.save(net.state_dict(), '%s/resnet18_vggface100_normal_%03d_epoch.pth' % (args.outf, epoch + 1))
-                    f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f,BATCH_SIZE:%d,lastTestLoss:%.3f" % (
-                    epoch+1, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                    f.write("EPOCH=%03d,Accuracy= %.3f%%,Time=%s,LR=%.6f,BATCH_SIZE:%d,lastLoss:%.3f" % (
+                    epoch, acc, time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
                     optimizer.state_dict()['param_groups'][0]['lr'], BATCH_SIZE, lastLoss))
 
                     f.write('\n')
                     f.flush()
-                scheduler.step(lastLoss, epoch=epoch)
-                if lastTrainLoss < T_threshold:
-                    print('train loss达到限值%s，提前退出' % lastTrainLoss)
-                    print('Saving model......')
-                    torch.save(net.state_dict(),
-                               '%s/resnet18_vggface100_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
-                    break
+                    # 记录最佳测试分类准确率并写入best_acc.txt文件中
+                    if acc > best_acc:
+                        f3 = open("best_acc.txt", "w")
+                        f3.write("EPOCH=%d,best_acc= %.3f%%" % (epoch + 1, acc))
+                        f3.close()
+                        best_acc = acc
+                scheduler.step(loss_val, epoch=epoch)
             print('Saving model......')
-            torch.save(net.state_dict(), '%s/resnet18_vggface100_normal_train_%03d_epoch.pth' % (args.outf, epoch + 1))
+            torch.save(net.state_dict(), '%s/resnet18_vggface100_normal_60epoch_%03d.pth' % (args.outf, epoch + 1))
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
 

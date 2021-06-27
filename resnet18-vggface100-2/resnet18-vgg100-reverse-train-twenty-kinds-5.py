@@ -23,20 +23,19 @@ trainForgetFile = r"/train-20kinds-all.txt"
 trainRetainFile = r"/train-80kinds-all.txt"
 testForgetFile = r"/test-20kinds-all.txt"
 testRetainFile = r"/test-80kinds-all.txt"
+trainFile = r"/train_list_100.txt"
+testFile = r"/test_list_100.txt"
 
 # 2080机器
-trainFile = r"/train-100kinds-200counts.txt"
-testFile = r"/test-100kinds-all.txt"
-fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
-dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
-datasetRoot = r'/datasets/train'
+
+# fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
+# dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
+# datasetRoot = r'/datasets/train'
 
 # 1080机器
-# trainFile = r"/train-100kinds-100counts.txt"
-# testFile = r"/test-100kinds-100counts.txt"
-# fileRoot = r'/media/public/ml/resnet18-vggface100-2'
-# dataRoot = r'/media/public/ml/resnet18_vggface2'
-# datasetRoot = r'/datasets/data/root'
+fileRoot = r'/media/public/ml/resnet18-vggface100-2'
+dataRoot = r'/media/public/ml/resnet18_vggface2'
+datasetRoot = r'/datasets/data/root'
 
 layeredParams = []
 
@@ -69,13 +68,13 @@ while layer_count < len(layeredParams):
     layer_count_list.append(layer_count)
     layer_count = layer_count + 1
 layer_count_list.append(len(layeredParams))
+
 preparedFrozenLayers = []
 for i, item in enumerate(layer_count_list):
     frozenLayer = []
-    for j in range(18 - item):
-        frozenLayer = frozenLayer + layeredParams[j]
+    for j in range(item):
+        frozenLayer = frozenLayer + layeredParams[17-j]
     preparedFrozenLayers.append(frozenLayer)
-
 # 参数设置,使得我们能够手动输入命令行参数，就是让风格变得和Linux命令行差不多
 parser = argparse.ArgumentParser(description='PyTorch CIFAR10 Training')
 parser.add_argument('--outf', default=fileRoot+'/model/', help='folder to output images and model checkpoints') #输出结果保存路径
@@ -89,6 +88,7 @@ parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--gpu', type=int, default=0)
 
 args = parser.parse_args()
+# print(args)
 os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 # os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 cuda = torch.cuda.is_available()
@@ -98,12 +98,10 @@ if cuda:
 EPOCH = 70   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-BATCH_SIZE = 30      #批处理尺寸(batch_size)
+BATCH_SIZE = 15      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
 T_threshold = 0.0111
-LR_threshold = 0.003124
 
-args.lr_threshold = LR_threshold
 # 0. id label map
 meta_file = args.meta_file
 id_label_dict = utils.get_id_label_map(meta_file)
@@ -120,6 +118,8 @@ print(len(trainset))
 testset = VGG_Faces2(root, test_img_list_file, id_label_dict, split='valid')
 testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2)
 print(len(testset))
+# Cifar-10的标签
+classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
 # 模型定义-ResNet
 net = ResNet18().to(device)
@@ -129,7 +129,8 @@ criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分�
 filePath = fileRoot + "/model/"
 initModel = "resnet18_vgg100_normal_init.pth"
 finishedModel = "resnet18_vggface100_normal_train_080_epoch.pth"
-paramList, freezeParamList = generateParamsResnet18(finishedModel, initModel, layeredParams, False, filePath)
+paramList, freezeParamList = generateParamsResnet18(initModel,finishedModel, layeredParams, True, filePath)
+print("begin cycle")
 for paramIndex, param in enumerate(paramList):
     print(param)
     optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9,

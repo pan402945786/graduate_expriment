@@ -4,13 +4,10 @@ import torch.optim as optim
 import torchvision
 import torchvision.transforms as transforms
 import argparse
-from resnet_1 import ResNet50
 import sys
 sys.path.append("..")
-import datasets
 import os
-import utils
-# from vgg_face2 import VGG_Faces2
+from common import utils
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -45,6 +42,7 @@ train_img_list_file = args.train_img_list_file
 test_img_list_file = args.test_img_list_file
 
 trainDict = {}
+testDict = {}
 trainList = []
 testList = []
 trainForgetList = []
@@ -52,15 +50,15 @@ trainRetainList = []
 testForgetList = []
 testRetainList = []
 fileRoot = r"D:\ww2\graduate_expriment\resnet18_vggface2\datasets\data"
-trainForgetFile = r"\train-20kinds-200counts.txt"
-trainRetainFile = r"\train-80kinds-200counts.txt"
+trainForgetFile = r"\train-20kinds-all.txt"
+trainRetainFile = r"\train-80kinds-all.txt"
 testForgetFile = r"\test-20kinds-all.txt"
 testRetainFile = r"\test-80kinds-all.txt"
-trainFile = r"\train-100kinds-100counts.txt"
-testFile = r"\test-100kinds-100counts.txt"
+# trainFile = r"\train-100kinds-100counts.txt"
+# testFile = r"\test-100kinds-100counts.txt"
 
 forget_num = 20
-counts = 100
+counts = 2000
 
 def writeFiles(list, fileName):
     with open(fileName, 'w') as f1:
@@ -70,8 +68,8 @@ def writeFiles(list, fileName):
     f1.close()
 
 
-def getDict(train_img_list_file, counts):
-    with open(train_img_list_file, 'r') as f:
+def getDict(img_list_file, counts):
+    with open(img_list_file, 'r') as f:
         for i, img_file in enumerate(f):
             img_file = img_file.strip()  # e.g. n004332/0317_01.jpg
             class_id = img_file.split("/")[0]  # like n004332
@@ -80,45 +78,59 @@ def getDict(train_img_list_file, counts):
                     trainDict[class_id].append(img_file)
             else:
                 trainDict[class_id] = [img_file]
+    f.close()
     return trainDict
 
+def getTestDict(img_list_file, counts):
+    with open(img_list_file, 'r') as testF:
+        for i, img_file in enumerate(testF):
+            img_file = img_file.strip()  # e.g. n004332/0317_01.jpg
+            class_id = img_file.split("/")[0]  # like n004332
+            if class_id in testDict.keys():
+                if len(testDict[class_id]) < counts:
+                    testDict[class_id].append(img_file)
+            else:
+                testDict[class_id] = [img_file]
+    testF.close()
+    return testDict
 
-# trainDict = getDict(train_img_list_file, counts)
-# i = 0
-# for key in sorted(trainDict):
-#     i += 1
-#     if i <= forget_num:
-#         for j, item in enumerate(trainDict[key]):
-#             trainForgetList.append(item)
-#     else:
-#         for j, item in enumerate(trainDict[key]):
-#             trainRetainList.append(item)
-# writeFiles(trainForgetList, fileRoot + trainForgetFile)
-# writeFiles(trainRetainList, fileRoot + trainRetainFile)
-#
-# trainDict = getDict(train_img_list_file, counts)
-# i = 0
-# for key in sorted(trainDict):
-#     i += 1
-#     if i <= forget_num:
-#         for j, item in enumerate(trainDict[key]):
-#             testForgetList.append(item)
-#     else:
-#         for j, item in enumerate(trainDict[key]):
-#             trainRetainList.append(item)
-# writeFiles(testForgetList, fileRoot + testForgetFile)
-# writeFiles(testRetainList, fileRoot + testRetainFile)
 
 trainDict = getDict(train_img_list_file, counts)
+i = 0
 for key in sorted(trainDict):
-    for i, item in enumerate(trainDict[key]):
-        trainList.append(item)
-writeFiles(trainList, fileRoot+trainFile)
+    i += 1
+    if i <= forget_num:
+        for j, item in enumerate(trainDict[key]):
+            trainForgetList.append(item)
+    else:
+        for j, item in enumerate(trainDict[key]):
+            trainRetainList.append(item)
+writeFiles(trainForgetList, fileRoot + trainForgetFile)
+writeFiles(trainRetainList, fileRoot + trainRetainFile)
 
-trainDict = getDict(test_img_list_file, counts)
-for key in sorted(trainDict):
-    for i, item in enumerate(trainDict[key]):
-        testList.append(item)
-writeFiles(testList, fileRoot+testFile)
+testDict = getTestDict(test_img_list_file, counts)
+i = 0
+for key in sorted(testDict):
+    i += 1
+    if i <= forget_num:
+        for j, item in enumerate(testDict[key]):
+            testForgetList.append(item)
+    else:
+        for j, item in enumerate(testDict[key]):
+            testRetainList.append(item)
+writeFiles(testForgetList, fileRoot + testForgetFile)
+writeFiles(testRetainList, fileRoot + testRetainFile)
+
+# trainDict = getDict(train_img_list_file, counts)
+# for key in sorted(trainDict):
+#     for i, item in enumerate(trainDict[key]):
+#         trainList.append(item)
+# writeFiles(trainList, fileRoot+trainFile)
+#
+# trainDict = getDict(test_img_list_file, counts)
+# for key in sorted(trainDict):
+#     for i, item in enumerate(trainDict[key]):
+#         testList.append(item)
+# writeFiles(testList, fileRoot+testFile)
 print("finished")
 exit()
