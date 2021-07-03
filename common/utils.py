@@ -117,6 +117,8 @@ def generateParamsResnet18(former, later, layeredParams, isReverse, filePath):
         freezeParams = []
 
         if isReverse:
+            if i == len(layeredParams)-1:
+                continue
             for j in range(i+1):
                 freezeParams = freezeParams + layeredParams[len(layeredParams)-j-1]
             resetLayerName = "reverse_reset_" + str(i+1) + "_"
@@ -141,6 +143,7 @@ def generateParamsResnet18(former, later, layeredParams, isReverse, filePath):
 def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fileAccName,fileLogName,EPOCH,BATCH_SIZE,T_threshold,pre_epoch,param,args):
     # 训练
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
+    best_acc = 0
     with open(fileAccName, "a+") as f:
         with open(fileLogName, "a+")as f2:
             for epoch in range(pre_epoch, EPOCH):
@@ -203,6 +206,11 @@ def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fi
                     100. * correct / total, optimizer.state_dict()['param_groups'][0]['lr'], lastLoss))
                     acc = 100. * correct / total
                     # 将每次测试结果实时写入acc.txt文件中
+                    if acc > best_acc:
+                        best_acc = acc
+                        print('Saving best acc model......')
+                        torch.save(net.state_dict(), '%s/%s_best_acc_model.pth' % (
+                            args.outf, param))
                     if (epoch + 1) % 10 < 1:
                         print('Saving model......')
                         torch.save(net.state_dict(), '%s/%s_%03d_epoch.pth' % (
@@ -218,6 +226,15 @@ def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fi
                     print('Saving model......')
                     torch.save(net.state_dict(),
                                '%s/%s_%03d_epoch.pth' % (args.outf, param.replace("before", "after"), epoch + 1))
+                    f.write("train loss达到限值%s，提前退出" % lastTrainLoss)
+                    f.write('\n')
+                    f.flush()
+                    break
+                if optimizer.state_dict()['param_groups'][0]['lr'] < 0.003:
+                    print("学习率过小，退出")
+                    f.write("学习率过小，退出")
+                    f.write('\n')
+                    f.flush()
                     break
             print('Saving model......')
             torch.save(net.state_dict(),

@@ -27,15 +27,19 @@ trainFile = r"/train_list_100.txt"
 testFile = r"/test_list_100.txt"
 
 # 2080机器
-
-# fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
-# dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
-# datasetRoot = r'/datasets/train'
+fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
+dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
+datasetRoot = r'/datasets/train'
 
 # 1080机器
-fileRoot = r'/media/public/ml/resnet18-vggface100-2'
-dataRoot = r'/media/public/ml/resnet18_vggface2'
-datasetRoot = r'/datasets/data/root'
+# fileRoot = r'/media/public/ml/resnet18-vggface100-2'
+# dataRoot = r'/media/public/ml/resnet18_vggface2'
+# datasetRoot = r'/datasets/data/root'
+
+# 实验室台式机
+# fileRoot = r'D:\ww2\graduate_expriment\resnet18-vggface100-2'
+# dataRoot = r'D:\ww2\graduate_expriment\resnet18_vggface2'
+# datasetRoot = r'\datasets\data\root'
 
 layeredParams = []
 
@@ -98,7 +102,7 @@ if cuda:
 EPOCH = 70   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 # BATCH_SIZE = 128      #批处理尺寸(batch_size)
-BATCH_SIZE = 15      #批处理尺寸(batch_size)
+BATCH_SIZE = 30      #批处理尺寸(batch_size)
 LR = 0.1        #学习率
 T_threshold = 0.0111
 
@@ -124,12 +128,28 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 # 模型定义-ResNet
 net = ResNet18().to(device)
 
+# checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vggface100_reverse_reset_4_before_training.pth", map_location='cpu')
+# checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vggface100_normal_train_080_epoch.pth", map_location='cpu')
+# checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vgg100_normal_init.pth", map_location='cpu')
+# net.load_state_dict(checkpoint)
+# paramsparams = net.state_dict()
+# for k, v in paramsparams.items():
+#     if k == 'layer4.0.left.0.weight':
+#         print(k)  # 打印网络中的变量名
+#         print(v)
+#         break
+# exit()
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
 filePath = fileRoot + "/model/"
 initModel = "resnet18_vgg100_normal_init.pth"
 finishedModel = "resnet18_vggface100_normal_train_080_epoch.pth"
 paramList, freezeParamList = generateParamsResnet18(initModel,finishedModel, layeredParams, True, filePath)
+paramList.reverse()
+freezeParamList.reverse()
+# print(paramList)
+# # print(freezeParamList)
+# # exit()
 print("begin cycle")
 for paramIndex, param in enumerate(paramList):
     print(param)
