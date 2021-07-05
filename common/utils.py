@@ -139,11 +139,51 @@ def generateParamsResnet18(former, later, layeredParams, isReverse, filePath):
     return fileNameList, freezeParamsList
 
 
+def generateReverseParamsResnet18(former, later, layeredParams, filePath):
+    # 定义是否使用GPU
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 模型定义-ResNet
+    net = ResNet18().to(device)
+    toLoad = {}
+    checkpoint = torch.load(filePath+later, map_location='cpu')
+    net.load_state_dict(checkpoint)
+    params = net.state_dict()
+    toLoad = params
+    checkpoint = torch.load(filePath+former, map_location='cpu')
+    strucName = 'resnet18_'
+    datasetName = 'vggface100_'
+    fileNameList = []
+    freezeParamsList = []
+    layer = [1,3,5,7,9,11,13,15,17,18]
+    for i, params in enumerate(layeredParams):
+        if i+1 in layer:
+            newLayerParams = []
+            for j in range(i+1):
+                newLayerParams = newLayerParams + layeredParams[j]
+            freezeParams = []
+            # if i == len(layeredParams) - 1:
+            #     continue
+            for j in range(len(layeredParams)-i-1):
+                freezeParams = freezeParams + layeredParams[len(layeredParams) - j - 1]
+            resetLayerName = "reverse_reset_former_" + str(i + 1) + "_"
+            fileName = strucName+datasetName+resetLayerName+"before_training.pth"
+            for k in checkpoint.keys():
+                if k in newLayerParams:
+                    toLoad[k] = checkpoint[k]
+                    # print("added:" + k)
+            net.load_state_dict(toLoad)
+            print('Saving model:'+fileName)
+            torch.save(net.state_dict(), '%s/%s' % (filePath, fileName))
+            fileNameList.append(fileName)
+            freezeParamsList.append(freezeParams)
+    return fileNameList, freezeParamsList
+
 # param是参数文件名称
 def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fileAccName,fileLogName,EPOCH,BATCH_SIZE,T_threshold,pre_epoch,param,args):
     # 训练
     print("Start Training, Resnet-18!")  # 定义遍历数据集的次数
     best_acc = 0
+    tolerate = 10
     with open(fileAccName, "a+") as f:
         with open(fileLogName, "a+")as f2:
             for epoch in range(pre_epoch, EPOCH):
@@ -211,6 +251,8 @@ def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fi
                         print('Saving best acc model......')
                         torch.save(net.state_dict(), '%s/%s_best_acc_model.pth' % (
                             args.outf, param))
+                        f.write("save best model\n")
+                        f.flush()
                     if (epoch + 1) % 10 < 1:
                         print('Saving model......')
                         torch.save(net.state_dict(), '%s/%s_%03d_epoch.pth' % (
@@ -221,7 +263,7 @@ def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fi
                     f.write('\n')
                     f.flush()
                 scheduler.step(lastLoss, epoch=epoch)
-                if lastTrainLoss < T_threshold:
+                if lastTrainLoss < T_threshold and epoch > tolerate:
                     print('train loss达到限值%s，提前退出' % lastTrainLoss)
                     print('Saving model......')
                     torch.save(net.state_dict(),
