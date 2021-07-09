@@ -8,6 +8,7 @@ import torch
 import shutil
 import pickle
 import time
+import math
 
 def load_state_dict(model, fname):
     """
@@ -283,3 +284,18 @@ def trainFunc(net,device,trainloader,testloader,optimizer,criterion,scheduler,fi
             torch.save(net.state_dict(),
                        '%s/%s_%03d_epoch.pth' % (args.outf, param.replace("before", "after"), epoch + 1))
             print("Training Finished, TotalEPOCH=%d" % EPOCH)
+
+
+def calcForgetPercent(forgetArr, retainArr, forgetRetrain, retainRetrain):
+    length = len(forgetArr)
+    forgetPercent = []
+    denominator = math.sqrt(pow(forgetRetrain, 2) + pow(retainRetrain, 2))
+    for i in range(length):
+        if forgetArr[i] > 1:
+            forgetArr[i] = forgetArr[i] / 100
+        if retainArr[i] > 1:
+            retainArr[i] = retainArr[i] / 100
+
+        numerator = math.sqrt(pow(forgetArr[i]-forgetRetrain, 2) + pow(retainArr[i]-retainRetrain, 2))
+        forgetPercent.append(1 - numerator / denominator)
+    return forgetPercent
