@@ -148,6 +148,8 @@ paramList, freezeParamList = generateParamsResnet18(finishedModel, initModel, la
 # exit()
 for paramIndex, param in enumerate(paramList):
     print(param)
+    if paramIndex < 8:
+        continue
     optimizer = optim.SGD(net.parameters(), lr=LR, momentum=0.9,
                           weight_decay=5e-4)  # 优化方式为mini-batch momentum-SGD，并采用L2正则化（权重衰减）
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=5, verbose=True,

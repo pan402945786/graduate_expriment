@@ -28,9 +28,9 @@ trainFile = r"/train_list_100.txt"
 testFile = r"/test_list_100.txt"
 
 # 2080机器
-# fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
-# dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
-# datasetRoot = r'/datasets/train'
+fileRoot = r'/home/ubuntu/ml/resnet18-vggface100-2'
+dataRoot = r'/home/ubuntu/ml/resnet18_vggface2'
+datasetRoot = r'/datasets/train'
 
 # 1080机器
 # fileRoot = r'/media/public/ml/resnet18-vggface100-2'
@@ -38,15 +38,15 @@ testFile = r"/test_list_100.txt"
 # datasetRoot = r'/datasets/data/root'
 
 # 实验室台式机
-fileRoot = r'D:\ww2\graduate_expriment\resnet18-vggface100-2'
-dataRoot = r'D:\ww2\graduate_expriment\resnet18_vggface2'
-datasetRoot = r'\datasets\data\root'
-trainForgetFile = r"\train-20kinds-all.txt"
-trainRetainFile = r"\train-80kinds-all.txt"
-testForgetFile = r"\test-20kinds-all.txt"
-testRetainFile = r"\test-80kinds-all.txt"
-trainFile = r"\train_list_100.txt"
-testFile = r"\test_list_100.txt"
+# fileRoot = r'D:\ww2\graduate_expriment\resnet18-vggface100-2'
+# dataRoot = r'D:\ww2\graduate_expriment\resnet18_vggface2'
+# datasetRoot = r'\datasets\data\root'
+# trainForgetFile = r"\train-20kinds-all.txt"
+# trainRetainFile = r"\train-80kinds-all.txt"
+# testForgetFile = r"\test-20kinds-all.txt"
+# testRetainFile = r"\test-80kinds-all.txt"
+# trainFile = r"\train_list_100.txt"
+# testFile = r"\test_list_100.txt"
 
 layeredParams = []
 
@@ -140,16 +140,16 @@ classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship'
 net = ResNet18().to(device)
 
 # checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vggface100_reverse_reset_former_13_before_training.pth_best_acc_model_20210706.pth", map_location='cpu')
-checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vggface100_normal_train_080_epoch.pth", map_location='cpu')
+# checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vggface100_normal_train_080_epoch.pth", map_location='cpu')
 # checkpoint = torch.load(r"D:\ww2\graduate_expriment\resnet18-vggface100-2\model\resnet18_vgg100_normal_init.pth", map_location='cpu')
-net.load_state_dict(checkpoint)
-paramsparams = net.state_dict()
-for k, v in paramsparams.items():
-    if k == 'layer4.0.left.0.weight':
-        print(k)  # 打印网络中的变量名
-        print(v)
-        break
-exit()
+# net.load_state_dict(checkpoint)
+# paramsparams = net.state_dict()
+# for k, v in paramsparams.items():
+#     if k == 'layer4.0.left.0.weight':
+#         print(k)  # 打印网络中的变量名
+#         print(v)
+#         break
+# exit()
 # 定义损失函数和优化方式
 criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分类问题
 filePath = fileRoot + "/model/"

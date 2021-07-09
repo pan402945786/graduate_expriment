@@ -96,10 +96,10 @@ parser.add_argument('--test_img_list_file', type=str, default=fileRoot+testFile,
                     help='text file containing image files used for validation, test or feature extraction')
 parser.add_argument('--test_retain_file', type=str, default=fileRoot+testRetainFile,
                     help='text file containing image files used for validation, test or feature extraction')
-# parser.add_argument('--test_forget_file', type=str, default=fileRoot+testForgetFile,
-#                     help='text file containing image files used for validation, test or feature extraction')
-parser.add_argument('--test_forget_file', type=str, default=fileRoot+trainForgetFile,
+parser.add_argument('--test_forget_file', type=str, default=fileRoot+testForgetFile,
                     help='text file containing image files used for validation, test or feature extraction')
+# parser.add_argument('--test_forget_file', type=str, default=fileRoot+trainForgetFile,
+#                     help='text file containing image files used for validation, test or feature extraction')
 parser.add_argument('--meta_file', type=str, default=dataRoot+r'/datasets/data/meta/identity_meta2.csv', help='meta file')
 parser.add_argument('--batch_size', type=int, default=32, help='batch size')
 parser.add_argument('--gpu', type=int, default=0)
@@ -159,59 +159,41 @@ print("Waiting Test!")
 targetFile = 'resnet18_vggface80_retrain_080_epoch.pth'
 
 savedFiles = [
-    'resnet18_vggface100_normal_train_080_epoch.pth',
-    'resnet18_vgg100_normal_init.pth',
-    'resnet18_vggface80_retrain_080_epoch.pth',
-    'resnet18_vggface100_reverse_reset_former_1_before_training.pth_best_acc_model.pth',
-    'resnet18_vggface100_reverse_reset_former_5_before_training.pth_best_acc_model.pth',
-    'resnet18_vggface100_reverse_reset_former_9_before_training.pth_best_acc_model.pth',
-    'resnet18_vggface100_reverse_reset_former_13_before_training.pth_best_acc_model.pth',
-    'resnet18_vggface100_reverse_reset_former_17_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_normal_train_080_epoch.pth',
+    # 'resnet18_vgg100_normal_init.pth',
+    # 'resnet18_vggface80_retrain_080_epoch.pth',
+    # 'resnet18_vggface100_reverse_reset_former_1_before_training.pth_best_acc_model_20210706.pth',
+    # 'resnet18_vggface100_reverse_reset_former_2_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_3_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_4_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_5_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_6_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_7_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_8_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_9_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_10_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_11_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_12_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_13_before_training.pth_best_acc_model_20210706.pth',
+    # 'resnet18_vggface100_reverse_reset_former_14_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_15_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_16_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_17_before_training.pth_best_acc_model.pth',
+    'resnet18_vggface100_reverse_reset_former_18_before_training.pth_best_acc_model.pth',
 
-    'resnet18_vggface100_reverse_reset_former_1_after_training.pth_070_epoch.pth',
-    'resnet18_vggface100_reverse_reset_former_5_after_training.pth_012_epoch.pth',
-    'resnet18_vggface100_reverse_reset_former_9_after_training.pth_012_epoch.pth',
-    'resnet18_vggface100_reverse_reset_former_13_after_training.pth_019_epoch.pth',
-    'resnet18_vggface100_reverse_reset_former_17_after_training.pth_032_epoch.pth',
+    # 'resnet18_vggface100_reset_1_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_2_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_3_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_4_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_5_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_6_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_7_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reset_8_before_training.pth_best_acc_model.pth',
 
-    # 'resnet18_vggface100_reset_1_after_training.pth_030_epoch.pth',
-    # 'resnet18_vggface100_reset_2_after_training.pth_040_epoch.pth',
-    # 'resnet18_vggface100_reset_3_after_training.pth_039_epoch.pth',
-    # 'resnet18_vggface100_reset_4_after_training.pth_070_epoch.pth',
-    # 'resnet18_vggface100_reset_5_after_training.pth_068_epoch.pth',
-    # 'resnet18_vggface100_reset_6_after_training.pth_053_epoch.pth',
-    # 'resnet18_vggface100_reset_7_after_training.pth_054_epoch.pth',
-    # 'resnet18_vggface100_reset_8_after_training.pth_058_epoch.pth',
-    # 'resnet18_vggface100_reset_9_after_training.pth_054_epoch.pth',
-    # 'resnet18_vggface100_reset_10_after_training.pth_059_epoch.pth',
-    # 'resnet18_vggface100_reset_11_after_training.pth_053_epoch.pth',
-    # 'resnet18_vggface100_reset_12_after_training.pth_060_epoch.pth',
-    # 'resnet18_vggface100_reset_14_after_training.pth_068_epoch.pth',
-    # 'resnet18_vggface100_reset_15_after_training.pth_059_epoch.pth',
-    # 'resnet18_vggface100_reset_16_after_training.pth_057_epoch.pth',
-    # 'resnet18_vggface100_reset_17_after_training.pth_058_epoch.pth',
-    # 'resnet18_vggface100_reset_18_after_training.pth_070_epoch.pth',
-    #
-    # 'resnet18_vggface100_reverse_reset_17_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_16_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_15_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_14_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_13_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_12_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_11_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_10_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_9_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_8_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_7_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_6_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_5_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_4_before_training.pth_best_acc_model.pth',
-    # 'resnet18_vggface100_reverse_reset_3_after_training.pth_066_epoch.pth',
-    # 'resnet18_vggface100_reverse_reset_2_after_training.pth_060_epoch.pth',
-    # 'resnet18_vggface100_reverse_reset_1_after_training.pth_063_epoch.pth',
+
 ]
 
-# testloader_unforget = torch.utils.data.DataLoader(testRetainSet, batch_size=100, shuffle=False, num_workers=2)
+testloader_unforget = torch.utils.data.DataLoader(testRetainSet, batch_size=100, shuffle=False, num_workers=2)
 testloader_forget = torch.utils.data.DataLoader(testForgetSet, batch_size=10, shuffle=False, num_workers=0)
 # testloader_all = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
 
@@ -241,127 +223,90 @@ testloader_forget = torch.utils.data.DataLoader(testForgetSet, batch_size=10, sh
 #
 #
 # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+#
+# totals = []
+# corrects = []
+# for i in range(len(savedFiles)):
+#     totals.append(0)
+#     corrects.append(0)
+# with torch.no_grad():
+#     for data in testloader_forget:
+#         net.eval()
+#         images, labels = data
+#         images, labels = images.to(device), labels.to(device)
+#         for i, file in enumerate(savedFiles, 0):
+#             # net.load_state_dict("./model/" + file, map_location='cpu')
+#             checkpoint = torch.load("./model/" + file)
+#             net.load_state_dict(checkpoint)
+#             outputs = net(images)
+#             # 取得分最高的那个类 (outputs.data的索引号)
+#             _, predicted = torch.max(outputs.data, 1)
+#             totals[i] += labels.size(0)
+#             corrects[i] += (predicted == labels).sum()
+#     for i, file in enumerate(savedFiles, 0):
+#         print(file + '测试遗忘集分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
+#
+# print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
-totals = []
-corrects = []
+#测试激活距离
+norm_1s = []
+norm_2s = []
 for i in range(len(savedFiles)):
-    totals.append(0)
-    corrects.append(0)
+    norm_1s.append(0)
+    norm_2s.append(0)
+
+def cal_norm(vec_1, vec_2, ord):
+    diff = vec_1 - vec_2
+    norm_sum = 0
+    for diff_item in diff:
+        norm_sum += np.linalg.norm(diff_item, ord=ord)
+    return norm_sum
+
+
 with torch.no_grad():
+    total_count = 0
     for data in testloader_forget:
         net.eval()
         images, labels = data
         images, labels = images.to(device), labels.to(device)
+        total_count += labels.size(0)
+        checkpoint = torch.load("./model/" + targetFile)
+        net.load_state_dict(checkpoint)
+        outputs = net(images)
+        prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
         for i, file in enumerate(savedFiles, 0):
-            # net.load_state_dict("./model/" + file, map_location='cpu')
             checkpoint = torch.load("./model/" + file)
             net.load_state_dict(checkpoint)
             outputs = net(images)
-            # 取得分最高的那个类 (outputs.data的索引号)
-            _, predicted = torch.max(outputs.data, 1)
-            totals[i] += labels.size(0)
-            corrects[i] += (predicted == labels).sum()
+            prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
+            norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
+            norm_2s[i] += cal_norm(prbblt_pred, prbblt_target, 2)
     for i, file in enumerate(savedFiles, 0):
-        print(file + '测试遗忘集分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
+        print(file + '测试遗忘集与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))
 
 print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-
-#测试激活距离
-# norm_1s = []
-# norm_2s = []
-# for i in range(len(savedFiles)):
-#     norm_1s.append(0)
-#     norm_2s.append(0)
-#
-# def cal_norm(vec_1, vec_2, ord):
-#     diff = vec_1 - vec_2
-#     norm_sum = 0
-#     for diff_item in diff:
-#         norm_sum += np.linalg.norm(diff_item, ord=ord)
-#     return norm_sum
-#
-#
-# with torch.no_grad():
-#     total_count = 0
-#     # for data in testloader_all:
-#     for data in testloader_forget:
-#     # for data in testloader_unforget:
-#         net.eval()
-#         images, labels = data
-#         images, labels = images.to(device), labels.to(device)
-#         total_count += labels.size(0)
-#         checkpoint = torch.load("./model/" + targetFile)
-#         net.load_state_dict(checkpoint)
-#         outputs = net(images)
-#         prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
-#         for i, file in enumerate(savedFiles, 0):
-#             checkpoint = torch.load("./model/" + file)
-#             net.load_state_dict(checkpoint)
-#             outputs = net(images)
-#             prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
-#             norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
-#             norm_2s[i] += cal_norm(prbblt_pred, prbblt_target, 2)
-#     for i, file in enumerate(savedFiles, 0):
-#         print(file + '测试遗忘集与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))
-#
-# print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-# norm_1s = []
-# norm_2s = []
-# for i in range(len(savedFiles)):
-#     norm_1s.append(0)
-#     norm_2s.append(0)
-# with torch.no_grad():
-#     total_count = 0
-#     # for data in testloader_all:
-#     # for data in testloader_forget:
-#     for data in testloader_unforget:
-#         net.eval()
-#         images, labels = data
-#         images, labels = images.to(device), labels.to(device)
-#         total_count += labels.size(0)
-#         checkpoint = torch.load("./model/" + targetFile)
-#         net.load_state_dict(checkpoint)
-#         outputs = net(images)
-#         prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
-#         for i, file in enumerate(savedFiles, 0):
-#             checkpoint = torch.load("./model/" + file)
-#             net.load_state_dict(checkpoint)
-#             outputs = net(images)
-#             prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
-#             norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
-#             norm_2s[i] += cal_norm(prbblt_pred, prbblt_target, 2)
-#     for i, file in enumerate(savedFiles, 0):
-#         print(file + '测试保留集与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))
-#
-#
-# print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-# norm_1s = []
-# norm_2s = []
-# for i in range(len(savedFiles)):
-#     norm_1s.append(0)
-#     norm_2s.append(0)
-# with torch.no_grad():
-#     total_count = 0
-#     for data in testloader_all:
-#     # for data in testloader_forget:
-#     # for data in testloader_unforget:
-#         net.eval()
-#         images, labels = data
-#         images, labels = images.to(device), labels.to(device)
-#         total_count += labels.size(0)
-#         checkpoint = torch.load("./model/" + targetFile)
-#         net.load_state_dict(checkpoint)
-#         outputs = net(images)
-#         prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
-#         for i, file in enumerate(savedFiles, 0):
-#             checkpoint = torch.load("./model/" + file)
-#             net.load_state_dict(checkpoint)
-#             outputs = net(images)
-#             prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
-#             norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
-#             norm_2s[i] += cal_norm(prbblt_pred, prbblt_target, 2)
-#     for i, file in enumerate(savedFiles, 0):
-#         print(file + '全部测试集与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))
-#
-#
-# print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+norm_1s = []
+norm_2s = []
+for i in range(len(savedFiles)):
+    norm_1s.append(0)
+    norm_2s.append(0)
+with torch.no_grad():
+    total_count = 0
+    for data in testloader_unforget:
+        net.eval()
+        images, labels = data
+        images, labels = images.to(device), labels.to(device)
+        total_count += labels.size(0)
+        checkpoint = torch.load("./model/" + targetFile)
+        net.load_state_dict(checkpoint)
+        outputs = net(images)
+        prbblt_target = np.array(torch.nn.functional.softmax(outputs).cpu())
+        for i, file in enumerate(savedFiles, 0):
+            checkpoint = torch.load("./model/" + file)
+            net.load_state_dict(checkpoint)
+            outputs = net(images)
+            prbblt_pred = np.array(torch.nn.functional.softmax(outputs).cpu())
+            norm_1s[i] += cal_norm(prbblt_pred, prbblt_target, 1)
+            norm_2s[i] += cal_norm(prbblt_pred, prbblt_target, 2)
+    for i, file in enumerate(savedFiles, 0):
+        print(file + '测试保留集与目标文件的第一范数距离为%.5f，第二范数距离为%.8f' % (1. * norm_1s[i] / total_count, 1. * norm_2s[i] / total_count))

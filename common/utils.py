@@ -154,7 +154,8 @@ def generateReverseParamsResnet18(former, later, layeredParams, filePath):
     datasetName = 'vggface100_'
     fileNameList = []
     freezeParamsList = []
-    layer = [1,3,5,7,9,11,13,15,17,18]
+    # layer = [1,3,5,7,9,11,13,15,17,18]
+    layer = [2,4,6,8,10,12,14,16,18]
     for i, params in enumerate(layeredParams):
         if i+1 in layer:
             newLayerParams = []
