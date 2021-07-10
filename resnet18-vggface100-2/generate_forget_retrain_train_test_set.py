@@ -8,6 +8,30 @@ import sys
 sys.path.append("..")
 import os
 from common import utils
+from common.utils import calcForgetPercent
+import numpy as np
+
+reset_freeze_retain_acc = [
+    90.963,91.075,90.338,90.225,89.950,89.400,
+    88.875,88.050,88.125,87.088,87.813,86.875,
+    81.750,86.863,86.463,64.788,86.163,85.988,
+]
+reset_freeze_forget_acc = [
+    0,0,0,0,0,0,
+    0,0,0,0,0,0,
+    0,0,0,0,0,0,
+]
+retrain_retain_acc = 0.86788
+retrain_forget_acc = 0.
+# C = np.array(reset_freeze_forget_acc)
+# S = np.array(reset_freeze_retain_acc)
+# S = np.divide(S, np.array(100.))
+
+lrfForgetPercent = calcForgetPercent(reset_freeze_forget_acc, reset_freeze_retain_acc, retrain_forget_acc, retrain_retain_acc)
+F = np.array(lrfForgetPercent)
+
+print(F)
+exit()
 
 # 定义是否使用GPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
