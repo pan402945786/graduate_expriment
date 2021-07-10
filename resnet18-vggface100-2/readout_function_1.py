@@ -179,7 +179,7 @@ savedFiles = [
     # 'resnet18_vggface100_reverse_reset_former_15_before_training.pth_best_acc_model.pth',
     # 'resnet18_vggface100_reverse_reset_former_16_before_training.pth_best_acc_model.pth',
     # 'resnet18_vggface100_reverse_reset_former_17_before_training.pth_best_acc_model.pth',
-    'resnet18_vggface100_reverse_reset_former_18_before_training.pth_best_acc_model.pth',
+    # 'resnet18_vggface100_reverse_reset_former_18_before_training.pth_best_acc_model.pth',
 
     # 'resnet18_vggface100_reset_1_before_training.pth_best_acc_model.pth',
     # 'resnet18_vggface100_reset_2_before_training.pth_best_acc_model.pth',
@@ -189,7 +189,12 @@ savedFiles = [
     # 'resnet18_vggface100_reset_6_before_training.pth_best_acc_model.pth',
     # 'resnet18_vggface100_reset_7_before_training.pth_best_acc_model.pth',
     # 'resnet18_vggface100_reset_8_before_training.pth_best_acc_model.pth',
-
+    'resnet18_vggface100_reset_9_before_training.pth_best_acc_model.pth',
+    'resnet18_vggface100_reset_10_before_training.pth_best_acc_model.pth',
+    'resnet18_vggface100_reset_11_before_training.pth_best_acc_model.pth',
+    'resnet18_vggface100_reset_12_before_training.pth_best_acc_model.pth',
+    'resnet18_vggface100_reset_13_before_training.pth_best_acc_model.pth',
+    'resnet18_vggface100_reset_14_before_training.pth_best_acc_model.pth',
 
 ]
 
@@ -198,55 +203,55 @@ testloader_forget = torch.utils.data.DataLoader(testForgetSet, batch_size=10, sh
 # testloader_all = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=2)
 
 # 测试准确率
-# totals = []
-# corrects = []
-# for i in range(len(savedFiles)):
-#     totals.append(0)
-#     corrects.append(0)
-#
-# with torch.no_grad():
-#     for data in testloader_unforget:
-#         net.eval()
-#         images, labels = data
-#         images, labels = images.to(device), labels.to(device)
-#         for i, file in enumerate(savedFiles, 0):
-#             # net.load_state_dict("./model/" + file, map_location='cpu')
-#             checkpoint = torch.load("./model/" + file)
-#             net.load_state_dict(checkpoint)
-#             outputs = net(images)
-#             # 取得分最高的那个类 (outputs.data的索引号)
-#             _, predicted = torch.max(outputs.data, 1)
-#             totals[i] += labels.size(0)
-#             corrects[i] += (predicted == labels).sum()
-#     for i, file in enumerate(savedFiles, 0):
-#         print(file + '测试保留集分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
-#
-#
-# print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-#
-# totals = []
-# corrects = []
-# for i in range(len(savedFiles)):
-#     totals.append(0)
-#     corrects.append(0)
-# with torch.no_grad():
-#     for data in testloader_forget:
-#         net.eval()
-#         images, labels = data
-#         images, labels = images.to(device), labels.to(device)
-#         for i, file in enumerate(savedFiles, 0):
-#             # net.load_state_dict("./model/" + file, map_location='cpu')
-#             checkpoint = torch.load("./model/" + file)
-#             net.load_state_dict(checkpoint)
-#             outputs = net(images)
-#             # 取得分最高的那个类 (outputs.data的索引号)
-#             _, predicted = torch.max(outputs.data, 1)
-#             totals[i] += labels.size(0)
-#             corrects[i] += (predicted == labels).sum()
-#     for i, file in enumerate(savedFiles, 0):
-#         print(file + '测试遗忘集分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
-#
-# print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+totals = []
+corrects = []
+for i in range(len(savedFiles)):
+    totals.append(0)
+    corrects.append(0)
+
+with torch.no_grad():
+    for data in testloader_unforget:
+        net.eval()
+        images, labels = data
+        images, labels = images.to(device), labels.to(device)
+        for i, file in enumerate(savedFiles, 0):
+            # net.load_state_dict("./model/" + file, map_location='cpu')
+            checkpoint = torch.load("./model/" + file)
+            net.load_state_dict(checkpoint)
+            outputs = net(images)
+            # 取得分最高的那个类 (outputs.data的索引号)
+            _, predicted = torch.max(outputs.data, 1)
+            totals[i] += labels.size(0)
+            corrects[i] += (predicted == labels).sum()
+    for i, file in enumerate(savedFiles, 0):
+        print(file + '测试保留集分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
+
+
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+
+totals = []
+corrects = []
+for i in range(len(savedFiles)):
+    totals.append(0)
+    corrects.append(0)
+with torch.no_grad():
+    for data in testloader_forget:
+        net.eval()
+        images, labels = data
+        images, labels = images.to(device), labels.to(device)
+        for i, file in enumerate(savedFiles, 0):
+            # net.load_state_dict("./model/" + file, map_location='cpu')
+            checkpoint = torch.load("./model/" + file)
+            net.load_state_dict(checkpoint)
+            outputs = net(images)
+            # 取得分最高的那个类 (outputs.data的索引号)
+            _, predicted = torch.max(outputs.data, 1)
+            totals[i] += labels.size(0)
+            corrects[i] += (predicted == labels).sum()
+    for i, file in enumerate(savedFiles, 0):
+        print(file + '测试遗忘集分类准确率为：%.3f%%' % (100. * corrects[i] / totals[i]))
+
+print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 #测试激活距离
 norm_1s = []

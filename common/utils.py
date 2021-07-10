@@ -3,7 +3,8 @@ import csv
 import os
 import sys
 sys.path.append("..")
-from common.resnet_100kinds_vggface2 import ResNet18
+# from common.resnet_100kinds_vggface2 import ResNet18
+from common.resnet_1 import ResNet18
 import torch
 import shutil
 import pickle
@@ -96,7 +97,7 @@ def create_dir(dir_name):
         os.makedirs(dir_name)
 
 
-def generateParamsResnet18(former, later, layeredParams, isReverse, filePath):
+def generateParamsResnet18(former, later, layeredParams, isReverse, filePath, layer):
     # 定义是否使用GPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # 模型定义-ResNet
@@ -109,34 +110,36 @@ def generateParamsResnet18(former, later, layeredParams, isReverse, filePath):
     checkpoint = torch.load(filePath+later, map_location='cpu')
     strucName = 'resnet18_'
     datasetName = 'vggface100_'
+    # datasetName = 'cifar10_'
     fileNameList = []
     freezeParamsList = []
     for i, params in enumerate(layeredParams):
-        newLayerParams = []
-        for j in range(i+1):
-            newLayerParams = newLayerParams + layeredParams[len(layeredParams)-j-1]
-        freezeParams = []
-
-        if isReverse:
-            if i == len(layeredParams)-1:
-                continue
+        if i + 1 in layer:
+            newLayerParams = []
             for j in range(i+1):
-                freezeParams = freezeParams + layeredParams[len(layeredParams)-j-1]
-            resetLayerName = "reverse_reset_" + str(i+1) + "_"
-        else:
-            for j in range(len(layeredParams) - i - 1):
-                freezeParams = freezeParams + layeredParams[j]
-            resetLayerName = "reset_" + str(i+1) + "_"
-        fileName = strucName+datasetName+resetLayerName+"before_training.pth"
-        for k in checkpoint.keys():
-            if k in newLayerParams:
-                toLoad[k] = checkpoint[k]
-                # print("added:" + k)
-        net.load_state_dict(toLoad)
-        print('Saving model:'+fileName)
-        torch.save(net.state_dict(), '%s/%s' % (filePath, fileName))
-        fileNameList.append(fileName)
-        freezeParamsList.append(freezeParams)
+                newLayerParams = newLayerParams + layeredParams[len(layeredParams)-j-1]
+            freezeParams = []
+
+            if isReverse:
+                if i == len(layeredParams)-1:
+                    continue
+                for j in range(i+1):
+                    freezeParams = freezeParams + layeredParams[len(layeredParams)-j-1]
+                resetLayerName = "reverse_reset_" + str(i+1) + "_"
+            else:
+                for j in range(len(layeredParams) - i - 1):
+                    freezeParams = freezeParams + layeredParams[j]
+                resetLayerName = "reset_" + str(i+1) + "_"
+            fileName = strucName+datasetName+resetLayerName+"before_training.pth"
+            for k in checkpoint.keys():
+                if k in newLayerParams:
+                    toLoad[k] = checkpoint[k]
+                    # print("added:" + k)
+            net.load_state_dict(toLoad)
+            print('Saving model:'+fileName)
+            torch.save(net.state_dict(), '%s/%s' % (filePath, fileName))
+            fileNameList.append(fileName)
+            freezeParamsList.append(freezeParams)
     return fileNameList, freezeParamsList
 
 
