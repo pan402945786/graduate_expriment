@@ -302,3 +302,18 @@ def calcForgetPercent(forgetArr, retainArr, forgetRetrain, retainRetrain):
         numerator = math.sqrt(pow(forgetArr[i]-forgetRetrain, 2) + pow(retainArr[i]-retainRetrain, 2))
         forgetPercent.append(1 - numerator / denominator)
     return forgetPercent
+
+
+def calcSingleForgetPercent(forgetAcc, retainAcc, forgetRetrain, retainRetrain):
+    if forgetAcc > 1:
+        forgetAcc = forgetAcc / 100
+    if retainAcc > 1:
+        retainAcc = retainAcc / 100
+    if forgetRetrain > 1:
+        forgetRetrain = forgetRetrain / 100
+    if retainRetrain > 1:
+        retainRetrain = retainRetrain / 100
+    numerator = math.sqrt(pow(forgetAcc-forgetRetrain, 2) + pow(retainAcc-retainRetrain, 2))
+    denominator = math.sqrt(pow(forgetRetrain, 2) + pow(retainRetrain, 2))
+    return 1 - numerator / denominator
+
