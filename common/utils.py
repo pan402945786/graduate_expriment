@@ -109,8 +109,8 @@ def generateParamsResnet18(former, later, layeredParams, isReverse, filePath, la
     toLoad = params
     checkpoint = torch.load(filePath+later, map_location='cpu')
     strucName = 'resnet18_'
-    datasetName = 'vggface100_'
-    # datasetName = 'cifar10_'
+    # datasetName = 'vggface100_'
+    datasetName = 'cifar10_'
     fileNameList = []
     freezeParamsList = []
     for i, params in enumerate(layeredParams):

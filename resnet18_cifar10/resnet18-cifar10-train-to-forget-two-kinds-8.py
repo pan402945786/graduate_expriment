@@ -145,7 +145,7 @@ criterion = nn.CrossEntropyLoss()  #损失函数为交叉熵，多用于多分�
 filePath = fileRoot + "/model/"
 initModel = "resnet18_cifar10_noraml_train_init.pth"
 finishedModel = "resnet18_cifar10_normal_train_finished_saving_60.pth"
-layer = [14,15]
+layer = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]
 paramList, freezeParamList = generateParamsResnet18(finishedModel, initModel, layeredParams, False, filePath, layer)
 # print(freezeParamList)
 # print('exit')
@@ -162,9 +162,9 @@ for paramIndex, param in enumerate(paramList):
     fileName = filePath + param
     checkpoint = torch.load(fileName)
     net.load_state_dict(checkpoint)
-    fileAccName = fileName + "_after_acc.txt"
-    fileLogName = fileName + "_after_log.txt"
-    fileModelName = fileName + "_after_training"
+    fileAccName = fileName + "_after2_acc.txt"
+    fileLogName = fileName + "_after2_log.txt"
+    fileModelName = fileName + "_after2_training"
     # 冻结相关层
     frozenIndex = []
     paramCount = 0

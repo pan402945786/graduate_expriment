@@ -1,6 +1,7 @@
 *.pth
 data/
 *.txt
+*.rar
 venv/
 .idea/
 __pycache__/
