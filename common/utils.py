@@ -97,20 +97,14 @@ def create_dir(dir_name):
         os.makedirs(dir_name)
 
 
-def generateParamsResnet18(former, later, layeredParams, isReverse, filePath, layer):
-    # 定义是否使用GPU
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def generateParamsResnet18(net, former, later, layeredParams, isReverse, filePath, strucName, datasetName, layer):
     # 模型定义-ResNet
-    net = ResNet18().to(device)
-    toLoad = {}
+    # net = ResNet18().to(device)
     checkpoint = torch.load(filePath+former, map_location='cpu')
     net.load_state_dict(checkpoint)
     params = net.state_dict()
     toLoad = params
     checkpoint = torch.load(filePath+later, map_location='cpu')
-    strucName = 'resnet18_'
-    # datasetName = 'vggface100_'
-    datasetName = 'cifar10_'
     fileNameList = []
     freezeParamsList = []
     for i, params in enumerate(layeredParams):
@@ -143,23 +137,16 @@ def generateParamsResnet18(former, later, layeredParams, isReverse, filePath, la
     return fileNameList, freezeParamsList
 
 
-def generateReverseParamsResnet18(former, later, layeredParams, filePath):
-    # 定义是否使用GPU
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+def generateReverseParamsResnet18(net, former, later, layeredParams, filePath, strucName, datasetName, layer):
     # 模型定义-ResNet
-    net = ResNet18().to(device)
-    toLoad = {}
+    # net = ResNet18().to(device)
     checkpoint = torch.load(filePath+later, map_location='cpu')
     net.load_state_dict(checkpoint)
     params = net.state_dict()
     toLoad = params
     checkpoint = torch.load(filePath+former, map_location='cpu')
-    strucName = 'resnet18_'
-    datasetName = 'vggface100_'
     fileNameList = []
     freezeParamsList = []
-    # layer = [1,3,5,7,9,11,13,15,17,18]
-    layer = [2,4,6,8,10,12,14,16,18]
     for i, params in enumerate(layeredParams):
         if i+1 in layer:
             newLayerParams = []
