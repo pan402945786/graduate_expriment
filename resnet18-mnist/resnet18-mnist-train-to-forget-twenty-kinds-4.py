@@ -152,7 +152,7 @@ finishedModel = "resnet18_mnist_normal_train_20.pth"
 strucName = 'resnet18_'
 datasetName = 'mnist_'
 paramList, freezeParamList = generateParamsResnet18(net, finishedModel, initModel, layeredParams, False, filePath,
-                                                    strucName, datasetName, [16])
+                                                    strucName, datasetName, [3,1])
 # print(freezeParamList)
 # print('exit')
 # exit()
