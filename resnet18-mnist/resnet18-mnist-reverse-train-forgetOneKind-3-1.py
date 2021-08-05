@@ -165,7 +165,7 @@ finishedModel = "resnet18_mnist_normal_train_20.pth"
 strucName = 'resnet18_'
 datasetName = 'mnist_forget_one_kind_'
 paramList, freezeParamList = generateReverseParamsResnet18(net, initModel,finishedModel, layeredParams, filePath,
-                                                           strucName, datasetName, range(15, 18))
+                                                           strucName, datasetName, range(13, 15))
 # paramList.reverse()
 # freezeParamList.reverse()
 # print(paramList)

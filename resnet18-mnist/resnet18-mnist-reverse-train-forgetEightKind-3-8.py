@@ -112,7 +112,7 @@ saveModelSpan = 10
 tolerate = 10
 
 # 准备数据集并预处理
-forget = [3,6,9]
+forget = [1,2,3,4,5,6,7,9]
 
 train_ds = MNIST("mnist", train=True, download=True, transform=ToTensor())
 print(len(train_ds))
@@ -163,9 +163,9 @@ initModel = "resnet18_mnist_noraml_train_init.pth"
 finishedModel = "resnet18_mnist_normal_train_20.pth"
 # paramList, freezeParamList = generateParamsResnet18(initModel,finishedModel, layeredParams, True, filePath)
 strucName = 'resnet18_'
-datasetName = 'mnist_forget_three_kind_'
+datasetName = 'mnist_forget_nine_kind_'
 paramList, freezeParamList = generateReverseParamsResnet18(net, initModel,finishedModel, layeredParams, filePath,
-                                                           strucName, datasetName, range(13, 15))
+                                                           strucName, datasetName, range(1, 18))
 # paramList.reverse()
 # freezeParamList.reverse()
 # print(paramList)
@@ -183,9 +183,9 @@ for paramIndex, param in enumerate(paramList):
     fileName = filePath + param
     checkpoint = torch.load(fileName)
     net.load_state_dict(checkpoint)
-    fileAccName = fileName + "_forget_three_kind_after_acc.txt"
-    fileLogName = fileName + "_forget_three_kind_after_log.txt"
-    fileModelName = fileName + "_forget_three_kind_after_training"
+    fileAccName = fileName + "_forget_nine_kind_after_acc.txt"
+    fileLogName = fileName + "_forget_nine_kind_after_log.txt"
+    fileModelName = fileName + "_forget_nine_kind_after_training"
     # 冻结相关层
     frozenIndex = []
     paramCount = 0
