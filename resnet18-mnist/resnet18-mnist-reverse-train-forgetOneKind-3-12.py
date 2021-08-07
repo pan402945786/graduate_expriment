@@ -164,7 +164,7 @@ initModel = "resnet18_mnist_noraml_train_init.pth"
 finishedModel = "resnet18_mnist_normal_train_20.pth"
 # paramList, freezeParamList = generateParamsResnet18(initModel,finishedModel, layeredParams, True, filePath)
 strucName = 'resnet18_'
-datasetName = 'mnist_forget_one_kind2_'
+datasetName = 'mnist_forget_one_kind4_'
 paramList, freezeParamList = generateReverseParamsResnet18(net, initModel,finishedModel, layeredParams, filePath,
                                                            strucName, datasetName, range(1, 17))
 # paramList.reverse()
@@ -184,9 +184,9 @@ for paramIndex, param in enumerate(paramList):
     fileName = filePath + param
     checkpoint = torch.load(fileName)
     net.load_state_dict(checkpoint)
-    fileAccName = fileName + "_forget_one_kind2_after_acc.txt"
-    fileLogName = fileName + "_forget_one_kind2_after_log.txt"
-    fileModelName = fileName + "_forget_one_kind2_after_training"
+    fileAccName = fileName + "_forget_one_kind4_after_acc.txt"
+    fileLogName = fileName + "_forget_one_kind4_after_log.txt"
+    fileModelName = fileName + "_forget_one_kind4_after_training"
     # 冻结相关层
     frozenIndex = []
     paramCount = 0
