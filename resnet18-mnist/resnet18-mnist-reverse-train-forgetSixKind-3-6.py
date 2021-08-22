@@ -36,7 +36,7 @@ testFile = r"/test_list_100.txt"
 # datasetRoot = r'/datasets/data/root'
 
 # 实验室台式机
-# fileRoot = r'D:\ww2\graduate_expriment\resnet18-vggface100-2'
+fileRoot = r'D:\ww2\graduate_expriment\resnet18-mnist'
 # dataRoot = r'D:\ww2\graduate_expriment\resnet18_vggface2'
 # datasetRoot = r'\datasets\data\root'
 # trainForgetFile = r"\train-20kinds-all.txt"
@@ -47,7 +47,7 @@ testFile = r"/test_list_100.txt"
 # testFile = r"\test_list_100.txt"
 
 # 自己电脑
-fileRoot = r'D:\www\graduate_expriment\resnet18-mnist'
+# fileRoot = r'D:\www\graduate_expriment\resnet18-mnist'
 # dataRoot = r'D:\www\graduate_expriment\resnet18_vggface2'
 # datasetRoot = r'\datasets\data\root'
 
@@ -163,7 +163,7 @@ initModel = "resnet18_mnist_noraml_train_init.pth"
 finishedModel = "resnet18_mnist_normal_train_20.pth"
 # paramList, freezeParamList = generateParamsResnet18(initModel,finishedModel, layeredParams, True, filePath)
 strucName = 'resnet18_'
-datasetName = 'mnist_forget_nine_kind_'
+datasetName = 'mnist_forget_six_kind_'
 paramList, freezeParamList = generateReverseParamsResnet18(net, initModel,finishedModel, layeredParams, filePath,
                                                            strucName, datasetName, range(1, 18))
 # paramList.reverse()
@@ -183,9 +183,9 @@ for paramIndex, param in enumerate(paramList):
     fileName = filePath + param
     checkpoint = torch.load(fileName)
     net.load_state_dict(checkpoint)
-    fileAccName = fileName + "_forget_nine_kind_after_acc.txt"
-    fileLogName = fileName + "_forget_nine_kind_after_log.txt"
-    fileModelName = fileName + "_forget_nine_kind_after_training"
+    fileAccName = fileName + "_forget_six_kind_after_acc.txt"
+    fileLogName = fileName + "_forget_six_kind_after_log.txt"
+    fileModelName = fileName + "_forget_six_kind_after_training"
     # 冻结相关层
     frozenIndex = []
     paramCount = 0

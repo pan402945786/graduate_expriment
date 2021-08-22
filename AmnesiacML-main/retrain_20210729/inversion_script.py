@@ -40,7 +40,7 @@ def imsave(img, fileName):
     plt.imshow(temp, vmin=0, vmax=1, cmap='Greys_r')
     plt.axis("off")
     plt.savefig(fileName, dpi=300)
-    plt.show()
+    # plt.show()
 
 
 # %%
@@ -59,7 +59,7 @@ def invert(model, x, y, num_iters=5000, learning_rate=1, show=False, refine=True
     for i in range(num_iters + 1):
         if i % 100 == 0:
             print("\rIteration: {}\tLoss: {}".format(i, loss), end="")
-        if i % 3 == 0 and i > 0:
+        if i % 200 == 0 and i > 0:
             nxList.append(nx[0])
         model.zero_grad()
         pred = model(nx)
@@ -96,11 +96,13 @@ def generate(model, target, learning_rate=1, num_iters=8000, examples=1, show=Tr
         image = invert(model, noise, targetval, show=False, learning_rate=learning_rate, num_iters=num_iters,
                        refine=True)
         if show:
-            imageStack = torch.stack(image)
-            imshow(torchvision.utils.make_grid(imageStack, nrow=3))
-            filename = file+"_inversion_target_" +str(target)+"_example_"+str(i)+".png"
-            imsave(torchvision.utils.make_grid(imageStack, nrow=3), filename)
-            stack.append(torchvision.utils.make_grid(imageStack, nrow=3))
+            # imageStack = torch.stack(image)
+            # imshow(torchvision.utils.make_grid(imageStack, nrow=3))
+            for j, item in enumerate(image):
+                filename = file+"_inversion_target_" +str(target)+"_example_"+str(i)+"_iter_"+str((j+1)*200)+".png"
+                imsave(item, filename)
+                # imshow(item)
+            # stack.append(torchvision.utils.make_grid(imageStack, nrow=3))
     return stack
 
 # %%
@@ -123,20 +125,21 @@ print(device)
 # Inversion Attack
 # %%
 fileList = [
-    "resnet18_mnist_normal_train_20.pth",
-    "resnet18_mnist_retrain_forget_two_kinds_10.pth",
+    # "resnet18_mnist_normal_train_20.pth",
+    # "resnet18_mnist_retrain_forget_two_kinds_10.pth",
     "resnet18_mnist_reset_3_before_training.pth_best_acc_model.pth",
     "resnet18_mnist_reset_1_before_training.pth_best_acc_model.pth",
 ]
 iters = 8000
 for item in fileList:
+    print(item)
     checkpoint = torch.load(item)
     model = ResNet18()
     model.load_state_dict(checkpoint)
     for i in range(10):
         filename = item+"_inversion_" + str(i) + "_iters_"+str(iters)+".png"
-        inversion = generate(model, file=item, target=i, num_iters=iters, examples=2, div=128)
-        images = torch.stack(inversion)
-        imshow(torchvision.utils.make_grid(images, nrow=3))
-        imsave(torchvision.utils.make_grid(images, nrow=3), filename)
+        inversion = generate(model, file=item, target=i, num_iters=iters, examples=1, div=128)
+        # images = torch.stack(inversion)
+        # imshow(torchvision.utils.make_grid(images, nrow=3))
+        # imsave(torchvision.utils.make_grid(images, nrow=3), filename)
 print('finished')

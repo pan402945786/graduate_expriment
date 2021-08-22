@@ -36,7 +36,7 @@ testFile = r"/test_list_100.txt"
 # datasetRoot = r'/datasets/data/root'
 
 # 实验室台式机
-# fileRoot = r'D:\ww2\graduate_expriment\resnet18-vggface100-2'
+fileRoot = r'D:\ww2\graduate_expriment\resnet18-mnist'
 # dataRoot = r'D:\ww2\graduate_expriment\resnet18_vggface2'
 # datasetRoot = r'\datasets\data\root'
 # trainForgetFile = r"\train-20kinds-all.txt"
@@ -47,7 +47,7 @@ testFile = r"/test_list_100.txt"
 # testFile = r"\test_list_100.txt"
 
 # 自己电脑
-fileRoot = r'D:\www\graduate_expriment\resnet18-mnist'
+# fileRoot = r'D:\www\graduate_expriment\resnet18-mnist'
 # dataRoot = r'D:\www\graduate_expriment\resnet18_vggface2'
 # datasetRoot = r'\datasets\data\root'
 

@@ -36,7 +36,7 @@ testFile = r"/test_list_100.txt"
 # datasetRoot = r'/datasets/data/root'
 
 # 实验室台式机
-# fileRoot = r'D:\ww2\graduate_expriment\resnet18-vggface100-2'
+fileRoot = r'D:\ww2\graduate_expriment\resnet18-mnist'
 # dataRoot = r'D:\ww2\graduate_expriment\resnet18_vggface2'
 # datasetRoot = r'\datasets\data\root'
 # trainForgetFile = r"\train-20kinds-all.txt"
@@ -47,7 +47,7 @@ testFile = r"/test_list_100.txt"
 # testFile = r"\test_list_100.txt"
 
 # 自己电脑
-fileRoot = r'D:\www\graduate_expriment\resnet18-mnist'
+# fileRoot = r'D:\www\graduate_expriment\resnet18-mnist'
 # dataRoot = r'D:\www\graduate_expriment\resnet18_vggface2'
 # datasetRoot = r'\datasets\data\root'
 
@@ -165,7 +165,7 @@ finishedModel = "resnet18_mnist_normal_train_20.pth"
 strucName = 'resnet18_'
 datasetName = 'mnist_forget_one_kind_'
 paramList, freezeParamList = generateReverseParamsResnet18(net, initModel,finishedModel, layeredParams, filePath,
-                                                           strucName, datasetName, range(13, 15))
+                                                           strucName, datasetName, range(1, 13))
 # paramList.reverse()
 # freezeParamList.reverse()
 # print(paramList)
