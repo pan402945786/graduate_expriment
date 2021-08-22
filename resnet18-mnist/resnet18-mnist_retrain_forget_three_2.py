@@ -39,9 +39,9 @@ if cuda:
 EPOCH = 10   #遍历数据集次数
 pre_epoch = 0  # 定义已经遍历数据集的次数
 BATCH_SIZE = args.batch_size      #批处理尺寸(batch_size)
-LR = 0.1        #学习率
+LR = 0.005        #学习率
 T_threshold = 0.0111
-tolerate = 10
+tolerate = 5
 
 # 模型定义-ResNet
 net = ResNet18().to(device)
